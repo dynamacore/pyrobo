@@ -3,36 +3,38 @@ import numpy as np
 class PID:
 	def __init__(self, prop, deriv, integral):
 		# for the gains
-		self.proportionalGain = prop
-		self.derivativeGain = deriv
-		self.integralGain = integral
+		self.prop_gain = prop
+		self.deriv_gain = deriv
+		self.int_gain = integral
 		
 		# for the integral and derivative gains
-		self.errorLast = 0
-		self.errorCum = 0
+		self.err_last = 0
+		self.err_cum = 0
 
-	def run(self, curValue, desValue):
+	def run(self, cur_value, des_value):
 		# calculate error
-		error = desValue - curValue
+		error = des_value - cur_value
 
 		# assign member variables
-		self.errorLast = error
-		self.errorCum = self.errorCum + error
-		self.eDiff = error - self.errorLast
+		self.err_last = error
+		self.err_cum = self.err_cum + error
+		self.eDiff = error - self.err_last
 
 		# return the pid
 
 		# check if multidimensional
-		if np.shape(self.proportionalGain) == ():
-			pTerm = self.proportionalGain * error
-			dTerm = self.derivativeGain * self.eDiff
-			iTerm = self.integralGain * self.errorCum
+		if np.shape(self.prop_gain) == ():
+			pTerm = self.prop_gain * error
+			dTerm = self.deriv_gain * self.eDiff
+			iTerm = self.int_gain * self.err_cum
 		
 		else:
-			pTerm = self.proportionalGain @ error
-			dTerm = self.derivativeGain @ self.eDiff
-			iTerm = self.integralGain @ self.errorCum
+			pTerm = self.prop_gain @ error
+			dTerm = self.deriv_gain @ self.eDiff
+			iTerm = self.int_gain @ self.err_cum
 			
 		return pTerm + dTerm + iTerm
+
+
 
 

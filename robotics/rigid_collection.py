@@ -22,7 +22,7 @@ class RigidCollection():
         self.collection.append(transform)
         return self.collection
 
-    def plot(self, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axisObj=None):
+    def plot(self, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axis_obj=None):
         """
         plot the collection in either attached or detached mode
         """
