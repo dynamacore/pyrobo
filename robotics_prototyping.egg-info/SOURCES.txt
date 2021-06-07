@@ -1,9 +1,0 @@
-setup.py
-robotics/__init__.py
-robotics/transform.py
-robotics_prototyping.egg-info/PKG-INFO
-robotics_prototyping.egg-info/SOURCES.txt
-robotics_prototyping.egg-info/dependency_links.txt
-robotics_prototyping.egg-info/not-zip-safe
-robotics_prototyping.egg-info/requires.txt
-robotics_prototyping.egg-info/top_level.txt

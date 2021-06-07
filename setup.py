@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="robotics-prototyping",
@@ -7,9 +7,10 @@ setup(
     author="Ben Kolligs",
     url='https://github.com/bkolligs/robotics-prototyping.git',
     license='MIT',
-    packages=['robotics'],
+    packages=find_packages(),
     zip_safe=False,
     install_requires=[
         'numpy'
+        'matplotlib'
     ]
 )

@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Transform:
     """
@@ -9,34 +11,41 @@ class Transform:
         return str(self.transform)
 
     def __repr__(self):
-        return "Transform({0}, {1}, {2}, {3}, {4}, {5})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi)
+        return "\nTransform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent={6}, child={7}, name={8})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
         self.child, self.parent, self.name = child, parent, name
 
         if transform is None:
             # create the transform
-            self.transformOnly = False
-            self.updateTransform(x, y, z, theta, phi, psi)
+            self.transform_only = False
+            self.update_transform(x, y, z, theta, phi, psi)
         else:
-            self.transformOnly = True
+            self.transform_only = True
             self.transform = transform
-            self.xAxis = self.transform[:3, 0]
-            self.yAxis = self.transform[:3, 1]
-            self.zAxis = self.transform[:3, 2]
+            self.x_axis = self.transform[:3, 0]
+            self.y_axis = self.transform[:3, 1]
+            self.z_axis = self.transform[:3, 2]
             self.origin = self.transform[:3, 3]
     
     # overload multiplication
     def __mul__(self, other):
         result = self.transform @ other.transform
-        resultTran = Transform(transform=result)
+        result_tran = Transform(transform=result)
         # calculate pose from transform
-        output = resultTran.inversePose()
+        output = result_tran.inverse_pose()
         x, y, z, theta, phi, psi = output
         return Transform(x, y, z, theta, phi, psi)
+    
+    def __eq__(self, other):
+        # overload equal sign to work with other transform objects and numpy arrays 
+        if isinstance(other, Transform):
+            return np.array_equal(self.transform, other.transform) and self.name == other.name
+        elif isinstance(other, np.ndarray):
+            return np.array_equal(self.transform, other)
 
     
-    def updateTransform(self, x, y, z, theta, phi, psi):
+    def update_transform(self, x, y, z, theta, phi, psi):
         """
         updates the transform according to the entered values
         """
@@ -77,12 +86,12 @@ class Transform:
         self.transform = self.tran @ self.rotZ @ self.rotY @ self.rotX
 
         # recover the axes for plotting
-        self.xAxis = self.transform[:3, 0]
-        self.yAxis = self.transform[:3, 1]
-        self.zAxis = self.transform[:3, 2]
+        self.x_axis = self.transform[:3, 0]
+        self.y_axis = self.transform[:3, 1]
+        self.z_axis = self.transform[:3, 2]
         self.origin = self.transform[:3, 3]
 
-    def inversePose(self, transform=None):
+    def inverse_pose(self, transform=None):
         """ 
         recovers x,y,z,r,p,y from a given transformation
         """
@@ -119,39 +128,74 @@ class Transform:
         """
         return np.array([self.x, self.y, self.z, self.theta, self.phi, self.psi]).reshape(-1, 1)
 
-    def plot(self, axisObj):
+    def plot(self, detached=False, axis_obj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0):
         """
-        add the transform coordinate frame to matplot lib axis
+        Plots the transform in its parent frame
+        """
+        if detached:
+            return self.__plot_detached(axis_obj, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+        else:
+            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+
+    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor):
+        """
+        Plots the transform on internally provided matplotlib axes 
+        """
+        fig = plt.figure()
+        axis_obj = plt.subplot(111, projection='3d')
+
+        self.__plot_axes(axis_obj, rgb_xyz, scale_factor)
+
+        axis_obj.set_xlim3d(xlim[0], xlim[1])
+        axis_obj.set_ylim3d(ylim[0], ylim[1])
+        axis_obj.set_zlim3d(zlim[0], zlim[1])
+        # return true if no errors raised
+        plt.show()
+
+    def __plot_detached(self, axis_obj, rgb_xyz, scale_factor):
+        """
+        Plots the transform on externally provided matplotlib axes
+        """
+        self.__plot_axes(axis_obj, rgb_xyz, scale_factor)
+
+    def __plot_axes(self, axis_obj, rgb_xyz, scale_factor):
+        """ 
+        Plots the axes of the transform on a mattplotlib axis
         """
         try:
             # normalize all axes
-            xAxis = self.xAxis / np.linalg.norm(self.xAxis) + self.origin
-            yAxis = self.yAxis / np.linalg.norm(self.yAxis) + self.origin
-            zAxis = self.zAxis / np.linalg.norm(self.zAxis) + self.origin
+            x_axis = (scale_factor * self.x_axis ) / np.linalg.norm(self.x_axis) + self.origin
+            y_axis = (scale_factor * self.y_axis ) / np.linalg.norm(self.y_axis) + self.origin
+            z_axis = (scale_factor * self.z_axis ) / np.linalg.norm(self.z_axis) + self.origin
 
             # collect plot values
             # i unit vectors
-            iX, iY, iZ  = xAxis[0], xAxis[1], xAxis[2]
+            iX, iY, iZ  = x_axis[0], x_axis[1], x_axis[2]
             # j unit vector
-            jX, jY, jZ = yAxis[0], yAxis[1], yAxis[2]
+            jX, jY, jZ = y_axis[0], y_axis[1], y_axis[2]
             # k unit vector
-            kX, kY, kZ = zAxis[0], zAxis[1], zAxis[2]
+            kX, kY, kZ = z_axis[0], z_axis[1], z_axis[2]
             # origin
             oX, oY, oZ = self.origin[0], self.origin[1], self.origin[2]
-                   
-            axisObj.plot([oX, iX], [oY, iY], [oZ, iZ], 'r')
-            axisObj.plot([oX, jX], [oY, jY], [oZ, jZ], 'g')
-            axisObj.plot([oX, kX], [oY, kY], [oZ, kZ], 'b')
+                    
+            axis_obj.plot([oX, iX], [oY, iY], [oZ, iZ], rgb_xyz[0])
+            axis_obj.plot([oX, jX], [oY, jY], [oZ, jZ], rgb_xyz[1])
+            axis_obj.plot([oX, kX], [oY, kY], [oZ, kZ], rgb_xyz[2])
 
-            # return true if no errors raised
-            return True
-        except:
-            return False
+        except AttributeError:
+            raise AttributeError("axis_obj is None")
+
     
     # inverse transform
     def inv(self):
+        """
+        compute the inverse of the transform
+        """
         rot = self.transform[:3, :3]
         tran = self.transform[:3, 3]
 
+        # compute new translation
         x, y, z = -rot.T @ tran
+
+        # initialize new transform as inverse
         return Transform(x, y, z, -self.theta, -self.phi, -self.psi)

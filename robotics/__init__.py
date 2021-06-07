@@ -9,3 +9,9 @@ The purpose of this package is to provide easy to use robotics prototyping funct
 
 """
 from .transform import *
+from .rigid_collection import *
+from .pointcloud import *
+from .kinematic_tree import *
+
+# subpackages
+from . import controllers
