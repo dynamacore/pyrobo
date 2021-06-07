@@ -9,3 +9,4 @@ The purpose of this package is to provide easy to use robotics prototyping funct
 
 """
 from .transform import *
+from .rigid_collection import *

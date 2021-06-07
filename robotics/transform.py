@@ -34,6 +34,13 @@ class Transform:
         output = resultTran.inversePose()
         x, y, z, theta, phi, psi = output
         return Transform(x, y, z, theta, phi, psi)
+    
+    def __eq__(self, other):
+        # overload equal sign to work with other transform objects and numpy arrays 
+        if isinstance(other, Transform):
+            return np.array_equal(self.transform, other.transform)
+        elif isinstance(other, np.ndarray):
+            return np.array_equal(self.transform, other)
 
     
     def updateTransform(self, x, y, z, theta, phi, psi):
@@ -150,8 +157,14 @@ class Transform:
     
     # inverse transform
     def inv(self):
+        """
+        compute the inverse of the transform
+        """
         rot = self.transform[:3, :3]
         tran = self.transform[:3, 3]
 
+        # compute new translation
         x, y, z = -rot.T @ tran
+
+        # initialize new transform as inverse
         return Transform(x, y, z, -self.theta, -self.phi, -self.psi)
