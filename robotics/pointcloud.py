@@ -11,12 +11,30 @@ class PointCloud:
 			self.cloud = cloud
 			self.frame = frame
 
-	def transform(self, frame_from, frame_to, transform=None, transformation_matrix=None):
+	def __str__(self):
+		return str(self.cloud)
+	
+	def __repr__(self):
+		return "PointCloud({0}, {1})".format(self.cloud, self.frame)
+
+	def transform(self, frame_from, frame_to, transform):
 		""" 
 		Transforms a point cloud according to the transform matrix and updates the frame member
 		"""
 		pass
 
-	def plot(self):
-		pass
+	def plot(self, color='b'):
+		"""
+		Plots the cloud for visualization
+		"""
+		fig = plt.figure()
+		ax = plt.subplot(111, projection='3d')
+
+		# plot the cloud
+		x = self.cloud[:, 0]
+		y = self.cloud[:, 1]
+		z = self.cloud[:, 2]
+		ax.scatter(x, y, z, color=color)
+		plt.show()
+
 
