@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class PointCloud:
 	""" 
@@ -10,7 +11,7 @@ class PointCloud:
 			self.cloud = cloud
 			self.frame = frame
 
-	def transform(self, frame_from, frame_to, transform):
+	def transform(self, frame_from, frame_to, transform=None, transformation_matrix=None):
 		""" 
 		Transforms a point cloud according to the transform matrix and updates the frame member
 		"""
