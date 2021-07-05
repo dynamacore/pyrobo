@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Transform:
     """
@@ -126,15 +128,45 @@ class Transform:
         """
         return np.array([self.x, self.y, self.z, self.theta, self.phi, self.psi]).reshape(-1, 1)
 
-    def plot(self, axisObj):
+    def plot(self, detached=False, axisObj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0):
         """
-        add the transform coordinate frame to matplot lib axis
+        Plots the transform in its parent frame
+        """
+        if detached:
+            return self.__plot_detached(axisObj, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+        else:
+            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+
+    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor):
+        """
+        Plots the transform on internally provided matplotlib axes 
+        """
+        fig = plt.figure()
+        axisObj = plt.subplot(111, projection='3d')
+
+        self.__plot_axes(axisObj, rgb_xyz, scale_factor)
+
+        axisObj.set_xlim3d(xlim[0], xlim[1])
+        axisObj.set_ylim3d(ylim[0], ylim[1])
+        axisObj.set_zlim3d(zlim[0], zlim[1])
+        # return true if no errors raised
+        plt.show()
+
+    def __plot_detached(self, axisObj, rgb_xyz, scale_factor):
+        """
+        Plots the transform on externally provided matplotlib axes
+        """
+        self.__plot_axes(axisObj, rgb_xyz, scale_factor)
+
+    def __plot_axes(self, axisObj, rgb_xyz, scale_factor):
+        """ 
+        Plots the axes of the transform on a mattplotlib axis
         """
         try:
             # normalize all axes
-            xAxis = self.xAxis / np.linalg.norm(self.xAxis) + self.origin
-            yAxis = self.yAxis / np.linalg.norm(self.yAxis) + self.origin
-            zAxis = self.zAxis / np.linalg.norm(self.zAxis) + self.origin
+            xAxis = (scale_factor * self.xAxis ) / np.linalg.norm(self.xAxis) + self.origin
+            yAxis = (scale_factor * self.yAxis ) / np.linalg.norm(self.yAxis) + self.origin
+            zAxis = (scale_factor * self.zAxis ) / np.linalg.norm(self.zAxis) + self.origin
 
             # collect plot values
             # i unit vectors
@@ -145,15 +177,14 @@ class Transform:
             kX, kY, kZ = zAxis[0], zAxis[1], zAxis[2]
             # origin
             oX, oY, oZ = self.origin[0], self.origin[1], self.origin[2]
-                   
-            axisObj.plot([oX, iX], [oY, iY], [oZ, iZ], 'r')
-            axisObj.plot([oX, jX], [oY, jY], [oZ, jZ], 'g')
-            axisObj.plot([oX, kX], [oY, kY], [oZ, kZ], 'b')
+                    
+            axisObj.plot([oX, iX], [oY, iY], [oZ, iZ], rgb_xyz[0])
+            axisObj.plot([oX, jX], [oY, jY], [oZ, jZ], rgb_xyz[1])
+            axisObj.plot([oX, kX], [oY, kY], [oZ, kZ], rgb_xyz[2])
 
-            # return true if no errors raised
-            return True
-        except:
-            return False
+        except AttributeError:
+            raise AttributeError("axisObj is None")
+
     
     # inverse transform
     def inv(self):

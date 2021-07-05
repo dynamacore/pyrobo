@@ -22,20 +22,22 @@ class RigidCollection():
         self.collection.append(transform)
         return self.collection
 
-    def plot(self, axes_lim=5):
+    def plot(self, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axisObj=None):
         """
-        plot the collection
+        plot the collection in either attached or detached mode
         """
-        fig = plt.figure()
-        ax = plt.subplot(111, projection='3d')
+        if not detached:
+            fig = plt.figure()
+            axisObj = plt.subplot(111, projection='3d')
 
         # plot the transforms
         for transform in self.collection:
-            transform.plot(ax)
+            transform.plot(detached=True, axisObj=axisObj, scale_factor=scale_factor, rgb_xyz=rgb_xyz)
 
         # adjust adxes scaling
-        ax.set_xlim3d(-axes_lim, axes_lim)
-        ax.set_ylim3d(-axes_lim, axes_lim)
-        ax.set_zlim3d(-axes_lim, axes_lim)
+        axisObj.set_xlim3d(-axes_lim, axes_lim)
+        axisObj.set_ylim3d(-axes_lim, axes_lim)
+        axisObj.set_zlim3d(-axes_lim, axes_lim)
 
-        plt.show()
+        if not detached:
+            plt.show()

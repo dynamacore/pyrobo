@@ -1,9 +1,8 @@
-import abc
 import numpy as np
 import matplotlib.pyplot as plt
 
 # sensor object to inherit for different sensors
-class Sensor(abc.ABC):
+class Sensor:
     def __init__(self, name, mean, cov, state):
         self.name_ = name
         # add the sensor noise characteristics
@@ -69,5 +68,5 @@ class GyroSensor(Sensor):
 
 
 if __name__ == '__main__':
-	sense = OdometrySensor("odom", 0, 0.2, np.zeros(3))
+	sense = Sensor("odom", 0, 0.2, np.zeros(3))
 	sense.testPlot()
