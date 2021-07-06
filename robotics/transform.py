@@ -11,7 +11,7 @@ class Transform:
         return str(self.transform)
 
     def __repr__(self):
-        return "\nTransform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi)
+        return "\nTransform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent={6}, child={7}, name={8})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
         self.child, self.parent, self.name = child, parent, name
@@ -40,7 +40,7 @@ class Transform:
     def __eq__(self, other):
         # overload equal sign to work with other transform objects and numpy arrays 
         if isinstance(other, Transform):
-            return np.array_equal(self.transform, other.transform)
+            return np.array_equal(self.transform, other.transform) and self.name == other.name
         elif isinstance(other, np.ndarray):
             return np.array_equal(self.transform, other)
 
@@ -164,17 +164,17 @@ class Transform:
         """
         try:
             # normalize all axes
-            xAxis = (scale_factor * self.x_axis ) / np.linalg.norm(self.x_axis) + self.origin
-            yAxis = (scale_factor * self.y_axis ) / np.linalg.norm(self.y_axis) + self.origin
-            zAxis = (scale_factor * self.z_axis ) / np.linalg.norm(self.z_axis) + self.origin
+            x_axis = (scale_factor * self.x_axis ) / np.linalg.norm(self.x_axis) + self.origin
+            y_axis = (scale_factor * self.y_axis ) / np.linalg.norm(self.y_axis) + self.origin
+            z_axis = (scale_factor * self.z_axis ) / np.linalg.norm(self.z_axis) + self.origin
 
             # collect plot values
             # i unit vectors
-            iX, iY, iZ  = xAxis[0], xAxis[1], xAxis[2]
+            iX, iY, iZ  = x_axis[0], x_axis[1], x_axis[2]
             # j unit vector
-            jX, jY, jZ = yAxis[0], yAxis[1], yAxis[2]
+            jX, jY, jZ = y_axis[0], y_axis[1], y_axis[2]
             # k unit vector
-            kX, kY, kZ = zAxis[0], zAxis[1], zAxis[2]
+            kX, kY, kZ = z_axis[0], z_axis[1], z_axis[2]
             # origin
             oX, oY, oZ = self.origin[0], self.origin[1], self.origin[2]
                     
