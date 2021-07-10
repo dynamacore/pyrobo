@@ -9,4 +9,6 @@ if __name__ == '__main__':
 	link4 = robotics.Transform(0.0, 0.2, 0.0, 0.0, 0, 0, parent="link3", child="link4", name="4To3")
 	link5 = robotics.Transform(0.0, 0.0, 0.0, 0.0, 0, 0, parent="link3", child="link5", name="5To3")
 	tree = robotics.KinematicTree([baseLink, link1, link2, link3, link4, link5])
-	tree.plot()
+	# tree.plot()
+	print(tree.get('link2', 'link5'))
+	print(link5*link3*link1*baseLink*link2.inv())
