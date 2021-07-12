@@ -117,25 +117,25 @@ class KinematicTree:
 		'''
 		Retrieves the transform between two frames on the tree
 		'''
+		# find a path if one exists
 		success, edges_traversed = self.__breadth_first_search(start_frame, end_frame)
 		if success:
 			# start from the goal
 			edge = edges_traversed[end_frame]
 			path_complete = False
 			path = []
+			# cycle through the back pointers to get the path
 			while not path_complete:
 				back_pointer = edge.parent
 				if back_pointer is not None:
-					print(edge.child)
 					path.append(edge)
 					if back_pointer == start_frame:
-						print(edge.parent)
 						path_complete = True
 					edge = edges_traversed[back_pointer]
 
 			# reverse the path to start from the start frame
 			path.reverse()
-			print(path)
+			if self.debug: [print(x.name) for x in path]
 		# return the path multiplied together
 		return np.prod(path)
 
@@ -198,4 +198,15 @@ class KinematicTree:
 
 		if not detached:
 			plt.show()
+	
+	def root(self, root_name='base_link'):
+		'''
+		Rearranges the tree such that all frames are expressed in terms of the given root node. No recursion because recursion is wack. 
+		'''
+		# initialize stack
+		open_nodes = [root_name]
+		while len(open_nodes) > 0:
+			node = open_nodes.pop(0)
+			edge = self.tree_rep[node]
+			print(edge.child)
 
