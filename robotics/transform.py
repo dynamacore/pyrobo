@@ -128,16 +128,16 @@ class Transform:
         """
         return np.array([self.x, self.y, self.z, self.theta, self.phi, self.psi]).reshape(-1, 1)
 
-    def plot(self, detached=False, axis_obj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0):
+    def plot(self, detached=False, axis_obj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0, view_angle=None):
         """
         Plots the transform in its parent frame
         """
         if detached:
             return self.__plot_detached(axis_obj, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
         else:
-            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor, view_angle=view_angle)
 
-    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor):
+    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor, view_angle):
         """
         Plots the transform on internally provided matplotlib axes 
         """
@@ -149,7 +149,9 @@ class Transform:
         axis_obj.set_xlim3d(xlim[0], xlim[1])
         axis_obj.set_ylim3d(ylim[0], ylim[1])
         axis_obj.set_zlim3d(zlim[0], zlim[1])
-        # return true if no errors raised
+        if view_angle is not None:
+            axis_obj.view_init(view_angle[0], view_angle[1])
+
         plt.show()
 
     def __plot_detached(self, axis_obj, rgb_xyz, scale_factor):
