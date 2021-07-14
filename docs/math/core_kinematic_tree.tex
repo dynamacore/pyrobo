@@ -1,0 +1,22 @@
+The kinematic tree is an abstract representation of a collection of transforms. 
+Unlike the rigid collection (section \ref{sec: rigid}), the kinematic tree is able to represent transforms in multiple datum frames. 
+The tree can then use the network of frames to "lookup" a transform between any two connected nodes, as hinted at in figure \ref{fig: poses}.
+This concept is widely used in robotics and therefore has a place in the prototyping package. 
+There are several algorithms this class implements:
+\begin{enumerate}
+	\item Representation: Construct a tree representation given only edges
+	\item Lookup: apply breadth first graph search to find a path between any two nodes on the tree
+	\item Root: express all frames in the base link frame or another specified frame on the tree
+\end{enumerate}
+
+\subsection{Representation}
+Frames in a kinematic tree can have a child frame, a parent frame, or both. 
+Frame $T$ is described as:
+\begin{equation}
+	T_i^{p(i)} = \begin{bmatrix}
+		R_i^{p(i)} & t_i^{p(i)} \\
+		\bf{0} & 1
+	\end{bmatrix}
+\end{equation}
+where $i$ is the child frame, and $p(i)$ is the parent frame. 
+The kinematic tree has a root, which we can also call the "base link". 

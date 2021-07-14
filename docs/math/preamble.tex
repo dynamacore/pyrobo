@@ -1,0 +1,89 @@
+
+% Import this into main.tex doc with \input{preamble} after class definition
+\usepackage[utf8]{inputenc}
+% MATH
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+\usepackage{commath}
+% [physics] contains nice derivative commands
+\usepackage{physics}
+% [bbold] contains doublestroke characters but overwrites several commands like \mathbb
+% \usepackage{bbold}
+% [cancel] allows the \cancelto{0}{x} command
+\usepackage{cancel}
+% adjusts height of the '\\' command for line breaks
+\setlength{\jot}{10pt}
+
+
+% FORMATTING
+% this adjusts margins
+% new margins for all pages
+%\usepackage[bottom=.6in,top=.6in]{geometry}
+% \newgeometry and \restoregeometry for page specific margins
+\usepackage{geometry}
+\usepackage[titletoc]{appendix}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{titling}
+% [lscape] for making landscape pages \begin{landscape}
+\usepackage{lscape}
+% for subfigures (better than minipages)
+% EX: \begin{subfigure}[t]{0.45\textwidth}
+\usepackage{subcaption}
+% for fancy tables
+\usepackage{ragged2e}
+\usepackage{array}
+% define new column types for tabular environments
+% these wrap text but you have to specify column width
+% ex: \begin{tabular}{|L{4cm}|L{2cm}}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% for inserting PDFs selectively
+\usepackage{pdfpages}
+
+% making hyperlinks throughout the document
+\usepackage[linktocpage=true, breaklinks=true]{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=blue,
+    filecolor=blue,
+    linkcolor=blue,
+    urlcolor=blue
+}
+\usepackage{lmodern}  % for bold teletype font
+\usepackage{xcolor}   % for \textcolor
+% lstlisting environment settings
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+  showstringspaces=false,
+  keepspaces=true,
+  commentstyle=\color{gray},
+  keywordstyle=\color{blue},
+  stringstyle=\color{green},
+  numbers=left
+}
+
+% changing name of abstract here
+\renewcommand{\abstractname}{Yung Salad}
+
+% SQUARE ROOT TAIL CODE
+
+\usepackage{letltxmacro}
+\makeatletter
+\let\oldr@@t\r@@t
+\def\r@@t#1#2{%
+\setbox0=\hbox{$\oldr@@t#1{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.4\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+\LetLtxMacro{\oldsqrt}{\sqrt}
+\renewcommand*{\sqrt}[2][\ ]{\oldsqrt[#1]{#2}}
+\makeatother

@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+\input{preamble.tex}
+
+\title{Robotics Prototyping Package Math and Algorithms}
+\author{Ben Kolligs}
+\date{}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\break
+	\section{Core Classes}
+	\subsection{Transform}
+	The main class of the core of the package is the Transform class. 
+	This class performs the functionality of a homogeneous rigid transform, which shows up in many places within robotics and robotics adjacent fields, like computer vision and graphics. 
+
+	% The transform document describing the transform class
+	\input{core_transform.tex}
+	\section{Pointcloud}
+	\input{core_pointcloud.tex}
+
+	\section{Rigid Collection}
+	\label{sec: rigid}
+	\input{core_rigid_collection.tex}
+
+	\section{Kinematic Tree}
+	\label{sec: kin tree}
+	\input{core_kinematic_tree.tex}
+
+\end{document}

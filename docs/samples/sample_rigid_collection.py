@@ -21,10 +21,10 @@ if __name__ == '__main__':
     # You can use the lookup function to find a particular transform
     collection.lookup("world")
     # However, to find a transform, we need to pass a name to a transform in order to use this function
-    world.name = "world"
-    collection.add(world)
-    # comment line 23 
+    collection.add(Transform(name="world"))
+    # comment out line 22 
     print("Lookup 'world': \n", collection.lookup("world"))
+
     # if we try to look up a transform that isn't in the collection we get an error so lets add more transforms with names
     wToBlade.name = "wToBlade"
     wToRover.name = "wToRover"
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     print("Lookup 'wToBlade': \n", collection.lookup("wToBlade"))
     print("Lookup 'wToRover': \n", collection.lookup("wToRover"))
 
-# TODO: fix this bug of transforms being equal even with different names
-    new = Transform(name="holy")
-    collection.add(new)
-    print(collection.lookup("holy"))
+    # notice that the collection now contains 4 transforms instead of three, why do you think that is? 
+    print("Number of collections in transform: ", len(collection.collection))
+    # hint: try calling collection.status
+    # collection.status()
