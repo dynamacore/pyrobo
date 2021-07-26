@@ -28,6 +28,9 @@ class Transform:
             self.z_axis = self.transform[:3, 2]
             self.origin = self.transform[:3, 3]
             self.x, self.y, self.z, self.theta, self.phi, self.psi = self.inverse_pose()
+        
+        # for graph traversal
+        self.__forward = True
     
     # overload multiplication
     def __mul__(self, other):
@@ -36,6 +39,15 @@ class Transform:
         # calculate pose from transform
         output = result_tran.inverse_pose()
         x, y, z, theta, phi, psi = output
+
+        if self.child == other.parent is not None:
+            source = self.child
+            source_other = other.child
+            dest = self.parent
+            dest_other = other.parent
+            return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+
+        # frames not specified
         return Transform(x, y, z, theta, phi, psi)
     
     def __eq__(self, other):
@@ -44,6 +56,16 @@ class Transform:
             return np.allclose(self.transform, other.transform) and self.name == other.name and self.parent == other.parent and self.child == other.child
         elif isinstance(other, np.ndarray):
             return np.allclose(self.transform, other)
+
+    # getters and setters for forward flag in graph traversal
+    def set_forward(self):
+        self.__forward = True
+    
+    def set_backward(self):
+        self.__forward = False
+    
+    def get_forward(self):
+        return self.__forward
     
     def update_transform(self, x, y, z, theta, phi, psi):
         """

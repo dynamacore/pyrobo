@@ -164,6 +164,45 @@ def test_multiply():
 	compare = one.transform @ two.transform
 	assert np.allclose(compare, (one*two).transform)
 
+@pytest.fixture
+def frames():
+	'''
+	Prepares set of frames to multiply together
+	'''
+	base = robotics.Transform(parent='base', child='base')
+	one = robotics.Transform(parent='base', child='one')
+	two = robotics.Transform(parent='one', child='two')
+	three = robotics.Transform(parent='two', child='three')
+	four = robotics.Transform(parent='two', child='four')
+	return [base, one, two, three, four]
+
+def test_multiply_frames(frames):
+	'''
+	Tests coordinate transform algebra
+	'''
+	base, one, two, three, four = frames
+	# source = one, dest = base
+	new = base * one
+	assert new.parent == base.parent
+	assert new.child == one.child
+
+def test_multiply_many_frames(frames):
+	base, one, two, three, four = frames
+	# source = three, dest = base
+	new = base * one * two * three
+	assert new.parent == base.parent
+	assert new.child == three.child
+
+def test_multiply_inverses_frames(frames):
+	base, one, two, three, four = frames
+	inv = two.inv()
+	new = two * inv 
+	assert new.parent == new.child
+
+def test_multiply_non_matching_frames(frames):
+	base, one, two, three, four = frames
+	new = four * one
+	assert new.parent == new.child is None
 
 if __name__ == '__main__':
 	one = robotics.Transform(x=0.5)
