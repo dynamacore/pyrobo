@@ -31,14 +31,26 @@ def test_simple_path():
 	box = robotics.Transform(x=1.0, z=0.5, parent="hand", child="box", name="box")
 	tree = robotics.KinematicTree([base_link, hand, box])
 	path = tree.get('base_link', 'box')
-	compare = robotics.Transform(x=1.5, z=0.5)
+	compare = robotics.Transform(x=1.5, z=0.5, parent='base_link', child='box')
 	assert compare == path
 	path = tree.get('box', 'base_link')
-	compare = robotics.Transform(x=-1.5, z=-0.5)
+	compare = robotics.Transform(x=-1.5, z=-0.5, parent='box', child='base_link')
 	assert compare == path
 
-def test_traverse(fixture):
+def test_root(fixture):
 	# get everything in the root frame
 	grounded = fixture.root()
-	assert False
+	assert len(grounded) == len(fixture.tree_rep)
+	for g in grounded:
+		assert grounded[g].parent == 'base_link'
 
+def test_root_comparison(fixture):
+	'''
+	The manually computed transform, rooted transform, and BFS search transform should all be the same
+	'''
+	grounded = fixture.root()
+	assert grounded['link5'] == robotics.Transform(0.1, 0.5, -0.2, np.pi, 0, 0, parent='base_link', child='link5') == fixture.get('base_link', 'link5')
+
+def test_root_arbitrary_frame(fixture):
+	grounded = fixture.root(destination='link2')
+	assert grounded['link5'] == robotics.Transform(0.1, 0.5, -0.7, np.pi, 0, 0, parent='link2', child='link5') == fixture.get('link2', 'link5')

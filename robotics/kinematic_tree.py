@@ -1,17 +1,19 @@
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import robotics as r
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class KinematicTree:
 	""" 
 	An ordered collection of transforms, most useful for creating a full robot
 	"""
-	def __init__(self, collection, root_index=0, root_name=None, debug=False):
+	def __init__(self, collection, root_index=0, root_name='base_link', debug=False):
 		self.debug = debug
 		self.rigid_collection = r.RigidCollection(collection)
+		self.__root_name = root_name
 		self.__tree_rep = 'incidence_list'
 		self.__assemble_tree(root_name=root_name, root_index=root_index, tree_rep=self.__tree_rep)
+		self.__root(root_name=root_name)
 
 	def set_tree_rep(self, rep_type):
 		self.__tree_rep = rep_type
@@ -51,10 +53,13 @@ class KinematicTree:
 			# now process the children, adding inverse edges
 			child = edge.child
 			if child is not None:
+				# set edge as a backward edge
+				edge_inv = edge.inv()
+				edge_inv.set_backward()
 				if child in tree_dict:
-					tree_dict[child].append(edge.inv())
+					tree_dict[child].append(edge_inv)
 				else:
-					tree_dict[child] = [edge.inv()]
+					tree_dict[child] = [edge_inv]
 		
 		return tree_dict
 	
@@ -135,7 +140,9 @@ class KinematicTree:
 
 			# reverse the path to start from the start frame
 			path.reverse()
-			if self.debug: [print(x.name) for x in path]
+			if self.debug:
+				print("[GET]")
+				[print("\t", x.name) for x in path]
 		# return the path multiplied together
 		return np.prod(path)
 
@@ -169,44 +176,100 @@ class KinematicTree:
 		return False, backpointers
 	
 	
-	def plot(self, display_arrows=True, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axis_obj=None):
+	def plot(self, display_arrows=True, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axis_obj=None, plot_frame=None, view_angle=None, transform_colors=None):
 		'''
 		Plots the kinematic trees with or without arrows
 		'''
-		if display_arrows:
-			self.__plot_arrows(axes_lim=axes_lim, scale_factor=scale_factor, rgb_xyz=rgb_xyz, detached=detached, axis_obj=axis_obj)
+		# if display_arrows:
+		# 	self.__plot_arrows(axes_lim=axes_lim, scale_factor=scale_factor, rgb_xyz=rgb_xyz, detached=detached, axis_obj=axis_obj)
 
-		else:
-			self.rigid_collection.plot(axes_lim=axes_lim, scale_factor=scale_factor, rgb_xyz=rgb_xyz, detached=detached, axisObj=axis_obj)
+		# else:
+		# plot the tree in a certain frame
+		if plot_frame is None:
+			plot_frame = self.__root_name
+		self.__plot_frames(axes_lim, scale_factor, rgb_xyz, detached, axis_obj, plot_frame, view_angle, transform_colors)
 
-	def __plot_arrows(self, axes_lim, scale_factor, rgb_xyz, detached, axis_obj):
+	def __plot_frames(self, axes_lim, scale_factor, rgb_xyz, detached, axis_obj, plot_frame, view_angle, transform_colors):
 		'''
-		Plots the kinematic tree with arrows connecting each frame to its parent
+		Plots the tree within a certain frame. Note that RGB needs to be a dictionary with each frame name
 		'''
 		if not detached:
 			fig = plt.figure()
 			axis_obj = plt.subplot(111, projection='3d')
+		frames = self.root(destination=plot_frame, root_name=self.__root_name)
+		for frame in frames:
+			transform = frames[frame]
+			# selects the given color for a transform
+			# transform colors should be a dictionary since this isn't a list
+			if transform_colors is not None:
+				rgb_xyz = transform_colors[frame]
+				if isinstance(rgb_xyz, str):
+					# to not get confused, dot lines
+					rgb_xyz = [rgb_xyz, rgb_xyz + ':', rgb_xyz + '--']
 
-		# plot the transforms
-		for transform in self.rigid_collection.collection:
 			transform.plot(detached=True, axis_obj=axis_obj, scale_factor=scale_factor, rgb_xyz=rgb_xyz)
-
-		# adjust adxes scaling
+		
 		axis_obj.set_xlim3d(-axes_lim, axes_lim)
 		axis_obj.set_ylim3d(-axes_lim, axes_lim)
 		axis_obj.set_zlim3d(-axes_lim, axes_lim)
 
+		axis_obj.set_xlabel("$x$", fontsize=24)
+		axis_obj.set_ylabel("$y$", fontsize=24)
+		axis_obj.set_zlabel("$z$", fontsize=24)
+
+		if view_angle is not None:
+			axis_obj.view_init(view_angle[0], view_angle[1])
+
 		if not detached:
 			plt.show()
 	
-	def root(self, root_name='base_link'):
+	def root(self, destination='base_link', root_name='base_link'):
 		'''
-		Rearranges the tree such that all frames are expressed in terms of the given root node. No recursion because recursion is wack. 
+		Transforms all frames into specified frame. If destination is not root, takes O(n) time to transform
 		'''
-		# initialize stack
+		if destination == root_name:
+			# __rooted frames is already in root 
+			return self.__rooted_frames
+		else:
+			if self.debug: print("[ROOT] Transforming frames into '{0}' from {1}".format(destination, root_name))
+			# obtain the transform to shift the entire tree to destination frame
+			branched_frames = {}
+			operator = self.__rooted_frames[destination].inv()
+			for t in self.__rooted_frames:
+				branched_frames[t] = operator * self.__rooted_frames[t]
+			
+			return branched_frames
+
+	def __root(self, root_name='base_link'):
+		'''
+		Transforms every frame into the base link
+		'''
+		def expand(current):
+			# expands a node by adding all the valid neighbors to the stack while extracting the transform
+			edges = self.tree_rep[current]
+			for edge in reversed(edges):
+				# if we have a forward node
+				if edge.get_forward():
+					current = edge.child
+					parent = edge.parent
+					if self.debug: print("\t\t", parent, "->", current)
+					if current not in open_nodes and current not in closed_nodes:
+						open_nodes.append(edge.child) 
+						# multiply the current node by the parent transform
+						self.__rooted_frames[current] = self.__rooted_frames[parent] * edge
+
+		# initialize the rooted frames list
+		self.__rooted_frames = {root_name : r.Transform(parent=root_name, child=root_name)}
+		# initialize open and closed lists
 		open_nodes = [root_name]
-		while len(open_nodes) > 0:
-			node = open_nodes.pop(0)
-			edge = self.tree_rep[node]
-			print(edge.child)
+		closed_nodes = []
+
+		if self.debug: print("[ROOT]")
+		while open_nodes:
+			current = open_nodes.pop()
+			if self.debug: print("\t", current)
+			closed_nodes.append(current)
+			expand(current)
+		
+		return self.__rooted_frames
 
