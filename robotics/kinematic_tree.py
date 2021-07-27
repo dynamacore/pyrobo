@@ -7,39 +7,37 @@ class KinematicTree:
 	""" 
 	An ordered collection of transforms, most useful for creating a full robot
 	"""
-	def __init__(self, collection, root_index=0, root_name='base_link', debug=False):
+	def __init__(self, collection, root_index=None, root_name='base_link', debug=False):
 		self.debug = debug
 		self.rigid_collection = r.RigidCollection(collection)
 		self.__root_name = root_name
 		self.__tree_rep = 'incidence_list'
-		self.__assemble_tree(root_name=root_name, root_index=root_index, tree_rep=self.__tree_rep)
+		self.__assemble_tree(root_name=root_name, tree_rep=self.__tree_rep)
 		self.__root(root_name=root_name)
 
 	def set_tree_rep(self, rep_type):
 		self.__tree_rep = rep_type
 
-	def __assemble_tree(self, root_index, root_name, tree_rep):
+	def __assemble_tree(self, root_name, tree_rep):
 		'''
 		Assembles the collection of transforms into a single tree representation, enabling each transform to only need their parent and child when passed to the tree object.
 		'''
 		if tree_rep == 'incidence_list':
-			self.tree_rep = self.__assemble_incidence_list(root_index, root_name)
+			self.tree_rep = self.__assemble_incidence_list(root_name)
 			return True
 		else:
 			return False
 	
-	def __assemble_incidence_list(self, root_index, root_name):
+	def __assemble_incidence_list(self, root_name):
 		'''
 		Assemble an incidence representation of the tree, where each node contains the transform edge in the dictionary
 		'''
 		# we are given the edges with each parent and child
 		tree_dict = {}
 		# get the root from the index
-		root = self.rigid_collection.collection[root_index]
+		root = root_name
 		# get the root from the name
-		if root_name is not None:
-			root = self.rigid_collection.lookup(root_name)
-		tree_dict[root.name] = []
+		tree_dict[root] = []
 		# traverse the edges first
 		for edge in self.rigid_collection.collection:
 			# if the edge's parent is in the tree dictionary, add it

@@ -11,7 +11,7 @@ class Transform:
         return str(self.transform)
 
     def __repr__(self):
-        return "Transform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent={6}, child={7}, name={8})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
+        return "Transform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent='{6}', child='{7}', name='{8}')".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
         self.child, self.parent, self.name = child, parent, name

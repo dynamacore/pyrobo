@@ -33,7 +33,7 @@ class RigidCollection():
             self.__assemble_collection_dict()
         return self.collection
 
-    def plot(self, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axis_obj=None, view_angle=None, transform_colors=None):
+    def plot(self, axes_lim=5, scale_factor=1.0, rgb_xyz=['r', 'g', 'b'], detached=False, axis_obj=None, view_angle=None, transform_colors=None, text=False, fontsize=16):
         """
         plot the collection in either attached or detached mode
         """
@@ -53,15 +53,17 @@ class RigidCollection():
                     rgb_xyz = [rgb_xyz, rgb_xyz + ':', rgb_xyz + '--']
 
             transform.plot(detached=True, axis_obj=axis_obj, scale_factor=scale_factor, rgb_xyz=rgb_xyz)
+            if text:
+                axis_obj.text(transform.x + transform.x/50, transform.y + transform.y/50, transform.z + transform.z/50, transform.name, fontsize=fontsize)
 
         # adjust adxes scaling
         axis_obj.set_xlim3d(-axes_lim, axes_lim)
         axis_obj.set_ylim3d(-axes_lim, axes_lim)
         axis_obj.set_zlim3d(-axes_lim, axes_lim)
 
-        axis_obj.set_xlabel("$x$", fontsize=24)
-        axis_obj.set_ylabel("$y$", fontsize=24)
-        axis_obj.set_zlabel("$z$", fontsize=24)
+        axis_obj.set_xlabel("$x$", fontsize=fontsize)
+        axis_obj.set_ylabel("$y$", fontsize=fontsize)
+        axis_obj.set_zlabel("$z$", fontsize=fontsize)
 
         if view_angle is not None:
             axis_obj.view_init(view_angle[0], view_angle[1])

@@ -49,7 +49,7 @@ The construction algorithm is shown in algorithm \ref{alg: inc_list}.
 
 \begin{algorithm}
 	\DontPrintSemicolon
-	\KwIn{Edge set $T$}
+	\KwIn{Unordered edge set $T$}
 	\KwOut{Hash map where frames are the keys and the transforms they are incident with are values}
 	tree $\gets \{\}$
 
@@ -93,10 +93,13 @@ Once the incidence list is constructed, then we can use it to query the tree to 
 The incidence list can keep track of the direction by assigning a flag to each edge specifying whether it is backwards or forwards. 
 This will be useful for the rooting algorithm, shown later. 
 
+An important thing to note is that in the context of the kinematic tree, an edge transform $T^i_j$ contains a child $j$ and a parent $i$ similar to a node. 
+However an edge can only have one parent and one child, whereas a node can have only one parent, but many children. 
+
 \subsection{Lookup path between frames}
 
 Now say we wanted to know the transform between two frames $i, j$ on the tree that aren't connected by an existing edge. 
-We can find this edge, $T_i^j$ by finding the path between the two frames, and then multiplying the transforms we pass through. 
+We can find this edge, $T_i^j$ by finding the path between the two frames, and then multiplying the transforms we pass through, as shown in figure \ref{fig: lookup}.
 
 \begin{figure}
 	\centering
@@ -104,3 +107,137 @@ We can find this edge, $T_i^j$ by finding the path between the two frames, and t
 	\caption{Lookup path between frames}
 	\label{fig: lookup}
 \end{figure}
+
+This can be done by executing a breadth first search on the tree in an attempt to find a path between two frames. 
+The algorithm is given in alorithm \ref{alg: lookup}.
+The algorithm shows how the algorithm is modified to deal with the need to store edges. 
+Once we have a path as a sequence of edges, we can multiply these transforms together to obtain the transform between frames $i, j$.
+
+
+\begin{algorithm}
+	\KwIn{start frame, end frame}
+	\KwOut{backpointers dictionary}
+	\DontPrintSemicolon
+	\SetKwFunction{expand}{expand}
+	\SetKwFunction{bfs}{search\_for\_path}
+	\SetKwProg{Fn}{def}{:}{}	$O \gets \varnothing$
+
+	\tcp{the main search function}
+	\Fn{\bfs{$x_{start}, x_{goal}$}}{
+
+		$C \gets \varnothing$
+
+		\tcp{the backpointers dictionary stores edges we've passed through}
+		backpointers = \{\}
+
+		$O$.insert(start)
+
+		backpointers.insert(start:$NULL$)
+
+		\While{$O \notin \varnothing$}{
+			$x \gets O$.pop()
+
+			$C$.insert($x$)
+
+			\If{\expand{x}}{
+				\Return{Success, backpointers}
+			}
+
+	}
+
+	\Return{Failure, backpointers}
+	}	
+
+	\tcp{The node expansion function}
+	\Fn{\expand{x}}{
+		\tcp{get the ordered set of transforms linked to $x$}
+		$T \gets x.edges$
+
+		\For{
+			$t \in T$
+		}{
+
+			\uIf{$t$.child = end}{
+				backpointers.insert($t.child : t$)
+				
+				\Return{Success}
+				}
+			\ElseIf{$t.child \notin O \textrm{ and } t.child \notin C$}{
+
+				backpointers.insert($t.child : t$)
+
+				O.insert($t.child$)
+			}
+			
+			\Return{Failure}
+			
+		}
+	}
+
+	\caption{Lookup between frames using breadth first search. The backpointers can then be used to extract the path of $n$ transforms between the frames: $\prod_i^n T_i^{p(i)}T^i_{c(i)}$}
+	\label{alg: lookup}
+\end{algorithm}
+
+\subsection{Root function}
+The other main algorithm used by the kinematic tree is the root function. 
+The purpose of this is simply to put every frame in the tree into the base frame. 
+From here, it is trivial to place the entire tree in coordinates of any frame in the tree. 
+If we use figure \ref{fig: lookup} for reference, then we want the frames $T^{base}_1,T^{base}_2, T^{base}_3, T^{base}_4, T^{base}_5$.
+We can obtain this through a depth first search that visits nodes in order and extracts the transform during the traversal. 
+Using the tree in figure \ref{fig: lookup}, we would visit the nodes from left to right: 4, 3, 5, 1, 2. 
+
+\begin{algorithm}
+	\SetKwFunction{expand}{expand}
+	\SetKwProg{Fn}{def}{:}{}	$O \gets \varnothing$
+
+	\KwIn{Root of the tree}
+	\KwOut{Dictionary of transforms $T_i^{base}$ for each frame $i$ in the tree}
+
+	frames = \{\}
+
+	$O \gets \varnothing$
+
+	$C \gets \varnothing$
+
+	$O$.insert(root)
+
+	\While{$O \neq \varnothing$}{
+		$x \gets O$.pop
+		
+		$C$.insert($x$)
+
+		\expand{x}
+
+	}
+
+	\Return{frames}
+
+	\tcp{depth first search expansion}
+	\Fn{\expand{$x$}}{
+		\tcp{traverse the ordered set $T$ of neighboring edges in reverse order}
+
+		$R \gets reverse(T)$
+
+		\ForAll{$t \in R$}{
+			\If{$t.forward()$}{
+				$x \gets t.child$
+
+				$p \gets t.parent$
+
+				\If{$x \notin O and x \notin C$}{
+					$O$.insert($x$)
+
+					$t^p_x \gets $ frames[$p$]
+
+					frames.insert($x$ : $t^{p}_x$ * $t$)
+				}
+			}
+		}
+	}
+
+	\caption{The depth first traversal used to derive the set of transforms $\mathcal{T} =\{ T^{base}_i \forall i : i \in K\}$ with frames $i$ in kinematic tree $K$.}
+	\label{alg: root}
+\end{algorithm}
+
+This is shown in algorithm \ref{alg: root}. 
+The root function can then be used to graph the entire tree in the base frame or any other frame in the tree. 
