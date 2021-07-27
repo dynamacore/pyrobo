@@ -4,13 +4,13 @@ The tree can then use the network of frames to "lookup" a transform between any 
 This concept is widely used in robotics and therefore has a place in the prototyping package. 
 There are several algorithms this class implements:
 \begin{enumerate}
-	\item Representation: Construct a tree representation given only edges
+	\item Representation: Construct a tree representation given only the edges
 	\item Lookup: apply breadth first graph search to find a path between any two nodes on the tree
-	\item Root: express all frames in the base link frame or another specified frame on the tree
+	\item Root: use depth first search to express all frames in the base link frame or another specified frame on the tree
 \end{enumerate}
 
 \subsection{Representation}
-Frames in a kinematic tree can have a child frame, a parent frame, or both. 
+Frames in a kinematic tree must have a child frame, a parent frame, or both. 
 Frame $T$ is described as:
 \begin{equation}
 	T_i^{p(i)} = \begin{bmatrix}
@@ -20,3 +20,87 @@ Frame $T$ is described as:
 \end{equation}
 where $i$ is the child frame, and $p(i)$ is the parent frame. 
 The kinematic tree has a root, which we can also call the "base link". 
+The challenge with the kinematic tree is that we are only given the transforms, which are the edges in the graph. 
+So we need to create a tree representation from just the transforms. 
+Transforms contain the parent and child of the edge, and are therefore directed. 
+Thus we want a representation that is easily able to express the directed nature of the graph. 
+
+The importance of the edges in the kinematic tree suggests that an incidence list is the best representation for this situation. 
+For example, say we have a tree as shown in figure \ref{fig: tree}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{images/example_tree.png}
+	\caption{Example tree}
+	\label{fig: tree}
+\end{figure}
+
+This takes the form:
+\begin{align}
+	base &: \big[ T^{base}_1, T^{base}_2\big] \\
+	1 &: \big[ T^1_3, T^1_{base} \big]\\
+	2 &: \big[ T^2_{base}\big]\\
+	3 &: \big[ T_4^3, T_5^3 \big] \\
+	4 &: \big[ T_3^4\big] \\
+	5 &: \big[ T_3^5\big] \\
+\end{align}
+We can improve memory storage by using a dictionary (hash map) in order to only save the relevant edges. 
+The construction algorithm is shown in algorithm \ref{alg: inc_list}.
+
+\begin{algorithm}
+	\DontPrintSemicolon
+	\KwIn{Edge set $T$}
+	\KwOut{Hash map where frames are the keys and the transforms they are incident with are values}
+	tree $\gets \{\}$
+
+	\tcp{hash.insert(key : value)}
+	tree.insert(root : $\varnothing$)
+
+	\For{$t \in T$}{$p \gets t.parent$
+
+		$c \gets t.child$
+
+		\tcp{process parents first}
+		\If{$p \neq NULL$}{
+			\eIf{$p \in$ tree}{
+				\tcp{we store list of transforms touching $p$}
+				tree[$p$].append($t$)
+			}{
+				tree.insert($p : \varnothing$)
+			}
+		}
+
+		\tcp{process children}
+		\If{$c \neq NULL$}{
+			\eIf{$c \in $ tree}{
+				\tcp{store whether the edge is forwards (used later)}
+				($t^{-1}).forwards \gets false$
+
+				tree[$c$].append($t^{-1}$)
+			}{
+				tree.insert($c : \varnothing$)
+			}
+
+		}
+	}
+
+	\Return{tree}
+	\caption{Incidence list representation for the Kinematic Tree}
+	\label{alg: inc_list}
+\end{algorithm}
+
+Once the incidence list is constructed, then we can use it to query the tree to find paths between frames.
+The incidence list can keep track of the direction by assigning a flag to each edge specifying whether it is backwards or forwards. 
+This will be useful for the rooting algorithm, shown later. 
+
+\subsection{Lookup path between frames}
+
+Now say we wanted to know the transform between two frames $i, j$ on the tree that aren't connected by an existing edge. 
+We can find this edge, $T_i^j$ by finding the path between the two frames, and then multiplying the transforms we pass through. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{images/lookup_path.png}
+	\caption{Lookup path between frames}
+	\label{fig: lookup}
+\end{figure}

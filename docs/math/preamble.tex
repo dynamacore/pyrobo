@@ -15,7 +15,11 @@
 \usepackage{cancel}
 % adjusts height of the '\\' command for line breaks
 \setlength{\jot}{10pt}
-
+% algorithms
+\usepackage[ruled, linesnumbered]{algorithm2e}
+% makes comments blue
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
 
 % FORMATTING
 % this adjusts margins
@@ -28,9 +32,9 @@
 \usepackage{float}
 \usepackage{titling}
 % [lscape] for making landscape pages \begin{landscape}
-\usepackage{lscape}
-% for subfigures (better than minipages)
-% EX: \begin{subfigure}[t]{0.45\textwidth}
+  \usepackage{lscape}
+  % for subfigures (better than minipages)
+  % EX: \begin{subfigure}[t]{0.45\textwidth}
 \usepackage{subcaption}
 % for fancy tables
 \usepackage{ragged2e}
