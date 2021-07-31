@@ -11,22 +11,26 @@ class Transform:
         return str(self.transform)
 
     def __repr__(self):
-        return "\nTransform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent={6}, child={7}, name={8})".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
+        return "Transform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent='{6}', child='{7}', name='{8}')".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
         self.child, self.parent, self.name = child, parent, name
 
         if transform is None:
             # create the transform
-            self.transform_only = False
+            self.transform_first = False
             self.update_transform(x, y, z, theta, phi, psi)
         else:
-            self.transform_only = True
+            self.transform_first = True
             self.transform = transform
             self.x_axis = self.transform[:3, 0]
             self.y_axis = self.transform[:3, 1]
             self.z_axis = self.transform[:3, 2]
             self.origin = self.transform[:3, 3]
+            self.x, self.y, self.z, self.theta, self.phi, self.psi = self.inverse_pose()
+        
+        # for graph traversal
+        self.__forward = True
     
     # overload multiplication
     def __mul__(self, other):
@@ -35,15 +39,33 @@ class Transform:
         # calculate pose from transform
         output = result_tran.inverse_pose()
         x, y, z, theta, phi, psi = output
+
+        if self.child == other.parent is not None:
+            source = self.child
+            source_other = other.child
+            dest = self.parent
+            dest_other = other.parent
+            return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+
+        # frames not specified
         return Transform(x, y, z, theta, phi, psi)
     
     def __eq__(self, other):
         # overload equal sign to work with other transform objects and numpy arrays 
         if isinstance(other, Transform):
-            return np.array_equal(self.transform, other.transform) and self.name == other.name
+            return np.allclose(self.transform, other.transform) and self.name == other.name and self.parent == other.parent and self.child == other.child
         elif isinstance(other, np.ndarray):
-            return np.array_equal(self.transform, other)
+            return np.allclose(self.transform, other)
 
+    # getters and setters for forward flag in graph traversal
+    def set_forward(self):
+        self.__forward = True
+    
+    def set_backward(self):
+        self.__forward = False
+    
+    def get_forward(self):
+        return self.__forward
     
     def update_transform(self, x, y, z, theta, phi, psi):
         """
@@ -83,6 +105,7 @@ class Transform:
             [0            , 0             , 0  , 1]
         ])
 
+        self.rot = (self.rotZ @ self.rotY @ self.rotX)[:3, :3]
         self.transform = self.tran @ self.rotZ @ self.rotY @ self.rotX
 
         # recover the axes for plotting
@@ -128,16 +151,16 @@ class Transform:
         """
         return np.array([self.x, self.y, self.z, self.theta, self.phi, self.psi]).reshape(-1, 1)
 
-    def plot(self, detached=False, axis_obj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0):
+    def plot(self, detached=False, axis_obj=None, rgb_xyz=['r', 'g', 'b'], xlim=[-2, 2], ylim=[-2, 2], zlim=[-2, 2], scale_factor=1.0, view_angle=None):
         """
         Plots the transform in its parent frame
         """
         if detached:
             return self.__plot_detached(axis_obj, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
         else:
-            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor)
+            return self.__plot_attached(xlim=xlim, ylim=ylim, zlim=zlim, rgb_xyz=rgb_xyz, scale_factor=scale_factor, view_angle=view_angle)
 
-    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor):
+    def __plot_attached(self, xlim, ylim, zlim, rgb_xyz, scale_factor, view_angle):
         """
         Plots the transform on internally provided matplotlib axes 
         """
@@ -149,7 +172,12 @@ class Transform:
         axis_obj.set_xlim3d(xlim[0], xlim[1])
         axis_obj.set_ylim3d(ylim[0], ylim[1])
         axis_obj.set_zlim3d(zlim[0], zlim[1])
-        # return true if no errors raised
+        axis_obj.set_xlabel("x")
+        axis_obj.set_ylabel("y")
+        axis_obj.set_zlabel("z")
+        if view_angle is not None:
+            axis_obj.view_init(view_angle[0], view_angle[1])
+
         plt.show()
 
     def __plot_detached(self, axis_obj, rgb_xyz, scale_factor):
@@ -195,7 +223,16 @@ class Transform:
         tran = self.transform[:3, 3]
 
         # compute new translation
-        x, y, z = -rot.T @ tran
+        new_tran = -rot.T @ tran
+        new_rot = rot.T
 
-        # initialize new transform as inverse
-        return Transform(x, y, z, -self.theta, -self.phi, -self.psi)
+        # assemble the inverse transform and assign it to a transform object
+        inv_transform = np.eye(4)
+        inv_transform[:3, :3] = new_rot
+        inv_transform[:3, 3] = new_tran
+
+        if self.name is not None:
+            # initialize new transform as inverse
+            return Transform(transform=inv_transform, parent=self.child, child=self.parent, name=self.name + "_inv")
+        else:
+            return Transform(transform=inv_transform, parent=self.child, child=self.parent, name=self.name)

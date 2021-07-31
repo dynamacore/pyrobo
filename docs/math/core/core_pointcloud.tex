@@ -1,0 +1,16 @@
+The pointcloud class contains a list of 3D points in space. 
+When transforming the entire pointcloud, the class simply creates homogeneous points out of the point list, and then multiplies a given homogeneous transform by this array. 
+So if we want to transform the coordinates of pointcloud $C^i$ from frame $i$ into frame $j$:
+\begin{equation}
+	C^i = \begin{bmatrix}
+		x_1 & x_2 & x_3 & \dots & x_n \\
+		y_1 & y_2 & y_3 & \dots & y_n \\
+		z_1 & z_2 & z_3 & \dots & z_n \\
+		1 & 1 & 1 & \dots & 1
+	\end{bmatrix}
+\end{equation}
+
+Then we need to multiply by the transform $T_i^j$: 
+\begin{equation}
+	C^j = T_i^j C^i.
+\end{equation}
