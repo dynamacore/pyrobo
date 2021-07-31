@@ -1,5 +1,16 @@
+# vscode related
 .vscode/
+
+# python related
 *.egg-info/
 __pycache__/
 *.pytest_cache
 *.pyc
+
+# latex related
+docs/math/*
+!docs/math/*.tex
+!docs/math/*.pdf
+# helper folders
+!docs/math/images/
+!docs/math/core/
