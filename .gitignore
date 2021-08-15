@@ -14,3 +14,6 @@ docs/math/*
 # helper folders
 !docs/math/images/
 !docs/math/core/
+
+# notebook related
+.ipynb_checkpoints
