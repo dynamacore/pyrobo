@@ -1,0 +1,71 @@
+from PIL.Image import new
+from matplotlib.pyplot import close
+from robotics.planning.graph_search import GraphSearch, GridCell
+import numpy as np
+
+class DijkstraSearch(GraphSearch):
+	def __init__(self, grid, validity_check = "occupied", adjacency=4) -> None:
+		'''
+		Dijkstra's optimal path algorithm
+		'''
+		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
+
+	def sort_nodes(self, node):
+		'''
+		Returns a nodes cost
+		'''
+		return node.cost_to_come
+	
+	def edge_cost(self, from_node, to_node):
+		'''
+		Returns the cost of a movement using the manhattan distance
+		'''
+		# return abs(to_node.x - from_node.x) + abs(to_node.y - from_node.y)
+		return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
+
+	def search(self, start, goal):
+		'''
+		Search through the grid to find an optimal path to the goal
+		'''
+		open = [start]
+		closed = []
+		start.cost_to_come = 0
+		path_found = False
+
+		while open and not path_found:
+			# sort the queue and retrieve the lowest cost node
+			open = sorted(open, key=self.sort_nodes)
+			cur = open.pop(0)
+			# maintain a closed list so we don't backtrack
+			closed.append(cur)
+
+			if cur == goal:
+				goal.parent = cur.parent
+				path_found = True
+			
+			# in the neighbors
+			for node in self.neighbors(cur.x, cur.y):
+				# calculate the cost to reach that node
+				new_cost = cur.cost_to_come + self.edge_cost(cur, node)
+				# if we haven't already seen this node and new cost is lower than current cost
+				if node not in closed and node not in open and new_cost < node.cost_to_come and self.valid(node):
+					# update the cost of the node
+					node.cost_to_come = new_cost
+					# append it to the queue
+					open.append(node)
+					node.parent = cur
+			
+					# keep track of the number of expansions
+		self.expansions = len(closed)
+		previous = goal.parent
+		path = None
+		if path_found:
+			path = []
+			while previous is not None:
+				path.append(previous)
+				previous = previous.parent
+		
+			# return path from start to goal
+			path.reverse()
+		
+		return path

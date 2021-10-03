@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class GridCell:
-	def __init__(self, x, y) -> None:
+	def __init__(self, x, y, g=np.inf, h=0) -> None:
 		self.x = x
 		self.y = y
 		self.parent = None
-		# store number of expansions
-		self.expansions = 0
+		# initialzie the cost to come at infinity
+		self.cost_to_come = g
+		self.cost_to_go = h
 	
 	def __eq__(self, o: object) -> bool:
 		if (self.x == o.x and self.y == o.y):
@@ -16,6 +17,9 @@ class GridCell:
 	
 	def __repr__(self) -> str:
 		return "[{0}, {1}]".format(self.x, self.y)
+	
+	def __hash__(self) -> int:
+		return hash(self.x) + hash(self.y) + hash(self.cost_to_come) + hash(self.cost_to_go) + hash(self.parent)
 
 class GraphSearch:
 	'''
@@ -25,6 +29,8 @@ class GraphSearch:
 		self.grid = grid
 		self.validity_check = validity_check
 		self.adjacency = adjacency
+		# store number of expansions
+		self.expansions = 0
 
 	def neighbors(self, i, j):
 		'''
