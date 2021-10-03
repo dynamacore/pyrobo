@@ -1,4 +1,4 @@
-from robotics.planning.graph_search import GraphSearch
+from robotics.planning.graph_search import GraphSearch, GridCell
 import numpy 
 
 class BreadthFirstSearch(GraphSearch):
@@ -8,7 +8,7 @@ class BreadthFirstSearch(GraphSearch):
 		'''
 		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
 	
-	def search(self, start, goal):
+	def search(self, start : GridCell, goal : GridCell):
 		'''
 		Finds a path from start to goal
 		'''

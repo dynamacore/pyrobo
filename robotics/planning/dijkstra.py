@@ -1,5 +1,4 @@
-from PIL.Image import new
-from matplotlib.pyplot import close
+from typing import List
 from robotics.planning.graph_search import GraphSearch, GridCell
 import numpy as np
 
@@ -10,20 +9,21 @@ class DijkstraSearch(GraphSearch):
 		'''
 		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
 
-	def sort_nodes(self, node):
+	def sort_nodes(self, node : GridCell) -> float:
 		'''
 		Returns a nodes cost
 		'''
 		return node.cost_to_come
 	
-	def edge_cost(self, from_node, to_node):
+	def edge_cost(self, from_node : GridCell, to_node : GridCell) -> float:
 		'''
 		Returns the cost of a movement using the manhattan distance
 		'''
 		# return abs(to_node.x - from_node.x) + abs(to_node.y - from_node.y)
-		return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
+		return self.grid[to_node.x, to_node.y]
+		# return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
 
-	def search(self, start, goal):
+	def search(self, start : GridCell, goal : GridCell) -> List[GridCell]:
 		'''
 		Search through the grid to find an optimal path to the goal
 		'''
@@ -47,13 +47,19 @@ class DijkstraSearch(GraphSearch):
 			for node in self.neighbors(cur.x, cur.y):
 				# calculate the cost to reach that node
 				new_cost = cur.cost_to_come + self.edge_cost(cur, node)
-				# if we haven't already seen this node and new cost is lower than current cost
-				if node not in closed and node not in open and new_cost < node.cost_to_come and self.valid(node):
-					# update the cost of the node
-					node.cost_to_come = new_cost
+				# if we haven't already seen this node
+				if node not in closed and node not in open:
 					# append it to the queue
 					open.append(node)
 					node.parent = cur
+				# or if we have seen it and new cost is lower
+				elif new_cost < node.cost_to_come:
+					# update the cost of the node
+					node.cost_to_come = new_cost
+					# add it to the queue
+					open.append(node)
+					node.parent = cur
+
 			
 					# keep track of the number of expansions
 		self.expansions = len(closed)

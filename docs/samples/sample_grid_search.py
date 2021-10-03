@@ -2,8 +2,6 @@ import robotics.planning as p
 import matplotlib.pyplot as plt
 import numpy as np
 
-from robotics.planning.dijkstra import DijkstraSearch
-
 def depth(grid, start, goal):
 	'''
 	Depth first search using the robotics package
@@ -44,7 +42,7 @@ def dijkstra(grid, start, goal):
 	'''
 	start = p.GridCell(start[0], start[1])
 	goal = p.GridCell(goal[0], goal[1])
-	dijk = DijkstraSearch(grid, adjacency=8)
+	dijk = p.DijkstraSearch(grid, adjacency=8)
 	dijk_path = dijk.search(start, goal)
 
 	if dijk_path:
@@ -91,7 +89,7 @@ if __name__ == '__main__':
 	# 		[0, 0, 0, 0, 1, 1, 0, 0],
 	# 	]
 	# )
-	grid = generate_grid(50, 1)
+	grid = generate_grid(30, 1)
 
 	s = [0, 0]
 	g = [15, 19]

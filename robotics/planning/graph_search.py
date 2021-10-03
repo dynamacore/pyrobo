@@ -1,3 +1,4 @@
+from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -32,7 +33,7 @@ class GraphSearch:
 		# store number of expansions
 		self.expansions = 0
 
-	def neighbors(self, i, j):
+	def neighbors(self, i : int, j : int) -> List[GridCell]:
 		'''
 		Returns list of neighbors for a grid cell i,j
 		'''
@@ -76,14 +77,14 @@ class GraphSearch:
 
 		return output
 			
-	def valid(self, node : GridCell):
+	def valid(self, node : GridCell) -> bool:
 		'''
 		Decides whether a node is valid or not, this can take multiple forms
 		'''
 		if self.validity_check == "occupied":
 			return self.grid[node.x, node.y] == 0
 
-	def display_path(self, path):
+	def display_path(self, path : List[GridCell]) -> None:
 		'''
 		Way to display the path through time
 		'''
