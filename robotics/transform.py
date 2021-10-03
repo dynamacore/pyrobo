@@ -14,6 +14,9 @@ class Transform:
         return "Transform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent='{6}', child='{7}', name='{8}')".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
+        """
+        Transform class for rigid transforms, theta, phi, psi = roll, pitch, yaw
+        """
         self.child, self.parent, self.name = child, parent, name
 
         if transform is None:
