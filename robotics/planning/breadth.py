@@ -1,3 +1,4 @@
+from typing import List
 from robotics.planning.graph_search import GraphSearch, GridCell
 import numpy 
 
@@ -8,7 +9,7 @@ class BreadthFirstSearch(GraphSearch):
 		'''
 		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
 	
-	def search(self, start : GridCell, goal : GridCell):
+	def search(self, start: GridCell, goal: GridCell) -> List[GridCell]:
 		'''
 		Finds a path from start to goal
 		'''

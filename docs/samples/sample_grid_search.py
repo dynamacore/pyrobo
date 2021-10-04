@@ -54,6 +54,43 @@ def dijkstra(grid, start, goal):
 	else:
 		print("No path found with Dijkstra's!")
 
+def best_first(grid, start, goal):
+	'''
+	Best first search
+	'''
+	start = p.GridCell(start[0], start[1])
+	goal = p.GridCell(goal[0], goal[1])
+
+	best = p.BestFirstSearch(grid, adjacency=8)
+	best_path = best.search(start, goal)
+	if best_path:
+		cost = 0
+		for x in best_path:
+			cost += x.cost_to_go
+		print("Path found with cost {0} with Best First! \n\tLength:".format(cost), len(best_path), ". Expanded: ", best.expansions)
+		best.display_path(best_path)
+	else:
+		print("No path found with Best First!")
+
+
+def astar(grid, start, goal):
+	'''
+	A star grid search
+	'''
+	start = p.GridCell(start[0], start[1])
+	goal = p.GridCell(goal[0], goal[1])
+
+	astar = p.AStarSearch(grid, adjacency=8)
+	astar_path = astar.search(start, goal)
+	if astar_path:
+		cost = 0
+		for x in astar_path:
+			cost += x.total_cost
+		print("Path found with cost {0} with AStar! \n\tLength:".format(cost), len(astar_path), ". Expanded: ", astar.expansions)
+		astar.display_path(astar_path)
+	else:
+		print("No path found with Dijkstra's!")
+
 def generate_grid(n, seed, show=False):
 	grid = np.zeros((n, n))
 	# obstacles
@@ -94,6 +131,8 @@ if __name__ == '__main__':
 	s = [0, 0]
 	g = [15, 19]
 	depth(grid,s, g)
-	# seems like both breadth and dijkstra's return optimal paths
+	# Breadth and Dijkstra's both return optimal paths for grids with uniform edge costs
 	breadth(grid, s, g)
 	dijkstra(grid, s, g)
+	best_first(grid, s, g)
+	astar(grid, s, g)

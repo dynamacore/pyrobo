@@ -1,5 +1,4 @@
-from os import path
-from matplotlib.pyplot import close
+from typing import List
 from robotics.planning.graph_search import GraphSearch, GridCell
 import numpy as np
 
@@ -10,7 +9,7 @@ class DepthFirstSearch(GraphSearch):
 		'''
 		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
 	
-	def search(self, start : GridCell, goal : GridCell):
+	def search(self, start: GridCell, goal: GridCell) -> List[GridCell]:
 		'''
 		Finds a path from the start to the goal
 		'''

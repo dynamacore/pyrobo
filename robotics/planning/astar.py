@@ -1,11 +1,11 @@
-from typing import List
 from robotics.planning.graph_search import GraphSearch, GridCell
+from typing import List
 import numpy as np
 
-class DijkstraSearch(GraphSearch):
+class AStarSearch(GraphSearch):
 	def __init__(self, grid, validity_check = "occupied", adjacency=4, metric='grid') -> None:
 		'''
-		Dijkstra's optimal path algorithm
+		A star algorithm
 		'''
 		super().__init__(grid, validity_check=validity_check, adjacency=adjacency)
 		self.metric = metric
@@ -14,28 +14,35 @@ class DijkstraSearch(GraphSearch):
 		'''
 		Returns a nodes cost
 		'''
-		return node.cost_to_come
+		return node.total_cost
 	
-	def edge_cost(self, from_node: GridCell, to_node: GridCell) -> float:
+	def edge_cost(self, from_node: GridCell, to_node: GridCell, metric=None) -> float:
 		'''
 		Returns the cost of a movement using the selected metric to calculate costs
 		'''
+		# User overridden metric
+		if metric is None:
+			metric = self.metric
+
 		# Manhattan distance
-		if self.metric == 'manhattan': return abs(to_node.x - from_node.x) + abs(to_node.y - from_node.y)
+		if metric == 'manhattan': return abs(to_node.x - from_node.x) + abs(to_node.y - from_node.y)
 
 		# Grid movement
-		if self.metric == 'grid': return self.grid[to_node.x, to_node.y]
+		if metric == 'grid': return self.grid[to_node.x, to_node.y]
 
 		# Euclidean distance
-		if self.metric == 'euclidean': return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
+		if metric == 'euclidean': return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
 
 	def search(self, start: GridCell, goal: GridCell) -> List[GridCell]:
 		'''
-		Search through the grid to find an optimal path to the goal
+		Search the grid to find a path from start to goal
 		'''
+		self.start = start
+		self.goal = goal
 		open = [start]
 		closed = []
 		start.cost_to_come = 0
+		start.total_cost = 0
 		path_found = False
 
 		while open and not path_found:
@@ -56,17 +63,21 @@ class DijkstraSearch(GraphSearch):
 				# if we haven't already seen this node
 				if node not in closed and node not in open:
 					# append it to the queue
+					node.cost_to_come = new_cost
+					# calculate the total cost with heuristic
+					node.total_cost = new_cost + self.edge_cost(node, goal, metric='manhattan')
 					open.append(node)
 					node.parent = cur
+
 				# or if we have seen it and new cost is lower
 				elif new_cost < node.cost_to_come:
 					# update the cost of the node
 					node.cost_to_come = new_cost
+					node.total_cost = new_cost + self.edge_cost(node, goal, metric='manhattan')
 					# add it to the queue
 					open.append(node)
 					node.parent = cur
 
-			
 		# keep track of the number of expansions
 		self.expansions = len(closed)
 		previous = goal.parent

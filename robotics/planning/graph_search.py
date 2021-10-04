@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class GridCell:
-	def __init__(self, x, y, g=np.inf, h=0) -> None:
+	def __init__(self, x, y, g=np.inf, h=0, f = np.inf) -> None:
 		self.x = x
 		self.y = y
 		self.parent = None
-		# initialzie the cost to come at infinity
+		# intialize the costs of the node for weighted algorithms
 		self.cost_to_come = g
 		self.cost_to_go = h
+		self.total_cost = f
 	
 	def __eq__(self, o: object) -> bool:
 		if (self.x == o.x and self.y == o.y):
