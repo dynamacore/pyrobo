@@ -113,24 +113,24 @@ def generate_grid(n, seed, show=False):
 
 if __name__ == '__main__':
 	# 8x8 grid to explore
-	# grid = np.array(
-	# 	[ 
-	# 		[0, 0, 1, 0, 1, 0, 0, 0],
-	# 		[0, 0, 0, 0, 0, 0, 0, 0],
-	# 		[0, 0, 1, 1, 1, 0, 1, 0],
-	# 		[0, 0, 1, 0, 0, 0, 0, 0],
-	# 		[0, 0, 1, 0, 1, 1, 0, 0],
-	# 		[0, 1, 1, 0, 0, 1, 1, 0],
-	# 		[0, 0, 0, 0, 0, 0, 0, 0],
-	# 		[0, 0, 0, 0, 1, 1, 0, 0],
-	# 		[0, 0, 0, 0, 1, 1, 0, 0],
-	# 	]
-	# )
-	grid = generate_grid(30, 1)
+	grid = np.array(
+		[ 
+			[0, 0, 1, 0, 1, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 1, 1, 1, 0, 1, 0],
+			[0, 0, 1, 0, 0, 0, 0, 0],
+			[0, 0, 1, 0, 1, 1, 0, 0],
+			[0, 1, 1, 0, 0, 1, 1, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 1, 1, 0, 0],
+			[0, 0, 0, 0, 1, 1, 0, 0],
+		]
+	) * 10
+	# grid = generate_grid(30, 1)
 
 	s = [0, 0]
-	g = [15, 19]
-	depth(grid,s, g)
+	g = [7, 7]
+	# depth(grid,s, g)
 	# Breadth and Dijkstra's both return optimal paths for grids with uniform edge costs
 	breadth(grid, s, g)
 	dijkstra(grid, s, g)

@@ -91,7 +91,7 @@ class GraphSearch:
 		'''
 		display = np.copy(self.grid)
 		for node in path:
-			display[node.x, node.y] = 2
+			display[node.x, node.y] = 5
 			plt.imshow(display)
 			plt.draw()
 			plt.pause(0.01)

@@ -28,7 +28,7 @@ class AStarSearch(GraphSearch):
 		if metric == 'manhattan': return abs(to_node.x - from_node.x) + abs(to_node.y - from_node.y)
 
 		# Grid movement
-		if metric == 'grid': return self.grid[to_node.x, to_node.y]
+		if metric == 'grid': return self.grid[to_node.x, to_node.y] + 1
 
 		# Euclidean distance
 		if metric == 'euclidean': return np.sqrt((from_node.x - to_node.x)**2 + (from_node.y - to_node.y)**2)
@@ -39,10 +39,10 @@ class AStarSearch(GraphSearch):
 		'''
 		self.start = start
 		self.goal = goal
-		open = [start]
-		closed = []
 		start.cost_to_come = 0
 		start.total_cost = 0
+		open = [start]
+		closed = []
 		path_found = False
 
 		while open and not path_found:
