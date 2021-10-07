@@ -14,6 +14,9 @@ class Transform:
         return "Transform(x={0}, y={1}, z={2}, roll={3}, pitch={4}, yaw={5}, parent='{6}', child='{7}', name='{8}')".format(self.x, self.y, self.z, self.theta, self.phi, self.psi, self.parent, self.child, self.name)
 
     def __init__(self, x=0, y=0, z=0, theta=0, phi=0, psi=0, child=None, parent=None, name=None, transform=None):
+        """
+        Transform class for rigid transforms, theta, phi, psi = roll, pitch, yaw
+        """
         self.child, self.parent, self.name = child, parent, name
 
         if transform is None:
@@ -34,18 +37,25 @@ class Transform:
     
     # overload multiplication
     def __mul__(self, other):
-        result = self.transform @ other.transform
-        result_tran = Transform(transform=result)
-        # calculate pose from transform
-        output = result_tran.inverse_pose()
-        x, y, z, theta, phi, psi = output
+        if isinstance(other, Transform):
+            result = self.transform @ other.transform
+            result_tran = Transform(transform=result)
+            # calculate pose from transform
+            output = result_tran.inverse_pose()
+            x, y, z, theta, phi, psi = output
 
-        if self.child == other.parent is not None:
-            source = self.child
-            source_other = other.child
-            dest = self.parent
-            dest_other = other.parent
-            return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+            if self.child == other.parent is not None:
+                source = self.child
+                source_other = other.child
+                dest = self.parent
+                dest_other = other.parent
+                return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+
+        elif isinstance(other, np.ndarray):
+            if other.shape == (4, ):
+                return self.transform @ other.reshape(-1, 1)
+            elif other.shape == (3, ):
+                return (self.transform @ np.array(list(other) + [1]))[:3]
 
         # frames not specified
         return Transform(x, y, z, theta, phi, psi)
@@ -67,7 +77,7 @@ class Transform:
     def get_forward(self):
         return self.__forward
     
-    def update_transform(self, x, y, z, theta, phi, psi):
+    def update_transform(self, x=0, y=0, z=0, theta=0, phi=0, psi=0):
         """
         updates the transform according to the entered values
         """
@@ -195,6 +205,11 @@ class Transform:
             x_axis = (scale_factor * self.x_axis ) / np.linalg.norm(self.x_axis) + self.origin
             y_axis = (scale_factor * self.y_axis ) / np.linalg.norm(self.y_axis) + self.origin
             z_axis = (scale_factor * self.z_axis ) / np.linalg.norm(self.z_axis) + self.origin
+
+            # save the axes to the context
+            self.x_axis = x_axis
+            self.y_axis = y_axis
+            self.z_axis = z_axis
 
             # collect plot values
             # i unit vectors
