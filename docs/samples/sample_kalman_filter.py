@@ -1,6 +1,7 @@
 import robotics
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from robotics.estimation.kalman_filter import KalmanFilter
 
 class Object3DTracking:
@@ -86,8 +87,12 @@ class Vehicle2DEstimation:
 		self.kalman = KalmanFilter(init_state, init_cov, F, Q, sigma_a, delta_t)
 		self.kalman.state, self.kalman.P = self.kalman.predict()
 		print("Initialized filter: \n", self.kalman.state, "\n", self.kalman.P)
-		self.xs = [-393.66,-375.93,-351.04,-328.96,-299.35,-273.36,-245.89,-222.58,-198.03,-174.17,-146.32,-123.72,-103.47,-78.23,-52.63,-23.34,	25.96,	49.72,	76.94,	95.38,	119.83,	144.01,	161.84,	180.56,	201.42,	222.62,	239.4,	252.51,	266.26,	271.75,	277.4,	294.12,	301.23,291.8,	299.89]
-		self.ys = [300.4,	301.78,	295.1,	305.19,	301.06,	302.05,	300,	303.57,	296.33,	297.65,	297.41,	299.61,	299.6,	302.39,	295.04,	300.09,	294.72,	298.61,	294.64,	284.88,	272.82,	264.93,	251.46,	241.27,	222.98,	203.73,	184.1,	166.12,	138.71,	119.71,	100.41,	79.76,	50.62,	32.99,	2.14]
+		cur_path = os.path.dirname(os.path.abspath(__file__))
+		data = np.load(cur_path + "/linear_kalman_vehicle_data.npz")
+		self.xs = data['x']
+		self.ys = data['y']
+
+
 	
 
 if __name__ == "__main__":
@@ -97,12 +102,10 @@ if __name__ == "__main__":
 		vehicle.H,
 		vehicle.R
 	)
-	print("Iteration 1: \n", update[0], "\n", update[1])
 	vehicle.kalman.state = update[0]
 	vehicle.kalman.P = update[1]
 	states = [vehicle.kalman.state.flatten()]
 	prediction = vehicle.kalman.predict()
-	print(prediction[0], "\n", prediction[1])
 	vehicle.kalman.state = prediction[0]
 	vehicle.kalman.P = prediction[1]
 
@@ -122,8 +125,6 @@ if __name__ == "__main__":
 
 	
 	states = np.array(states)
-	print("Total", states[:, 0])
-	print("Total", states[:, 3])
 	plt.plot(vehicle.xs, vehicle.ys, 'b', label="Measurements")
 	plt.plot(states[:, 0], states[:, 3], 'r', label="Filtered")
 	plt.legend()
