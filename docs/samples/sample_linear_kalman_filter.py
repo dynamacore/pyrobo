@@ -1,7 +1,6 @@
-import robotics
+import os
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 from robotics.estimation.kalman_filter import KalmanFilter
 
 class Object3DTracking:
@@ -29,7 +28,7 @@ class Object3DTracking:
 		)
 		state_init = np.zeros(6)
 		cov_init = np.eye(6)
-		kalman = robotics.KalmanFilter(state_init, cov_init, control_F, control_G, np.eye(6), 0.5, delta_t)
+		kalman = KalmanFilter(state_init, cov_init, control_F, control_G, np.eye(6), 0.5, delta_t)
 		print(kalman.predict([0.1, 0, 0]))
 
 		# measure the x, y, z coordinates
@@ -84,47 +83,37 @@ class Vehicle2DEstimation:
 			]
 		)
 		self.R = np.eye(2)*9
-		self.kalman = KalmanFilter(init_state, init_cov, F, Q, sigma_a, delta_t)
-		self.kalman.state, self.kalman.P = self.kalman.predict()
-		print("Initialized filter: \n", self.kalman.state, "\n", self.kalman.P)
+		self.kalman = KalmanFilter(init_state, init_cov, F, Q)
+		self.kalman.state, self.kalman.covariance = self.kalman.predict()
+		print("Initialized filter: \n", self.kalman.state, "\n", self.kalman.covariance)
 		cur_path = os.path.dirname(os.path.abspath(__file__))
-		data = np.load(cur_path + "/linear_kalman_vehicle_data.npz")
+		data = np.load(cur_path + "/data/linear_kalman_vehicle_data.npz")
 		self.xs = data['x']
 		self.ys = data['y']
 
-
-	
-
 if __name__ == "__main__":
 	vehicle = Vehicle2DEstimation()
-	update = vehicle.kalman.update(
+	vehicle.kalman.update(
 		np.array([-393.66, 300.4]).reshape(-1, 1),
 		vehicle.H,
 		vehicle.R
 	)
-	vehicle.kalman.state = update[0]
-	vehicle.kalman.P = update[1]
 	states = [vehicle.kalman.state.flatten()]
-	prediction = vehicle.kalman.predict()
-	vehicle.kalman.state = prediction[0]
-	vehicle.kalman.P = prediction[1]
+	vehicle.kalman.predict()
 
+	# perform simulation over the rest of the measurements
 	for x in range(1, len(vehicle.xs)):
 		point = np.array([vehicle.xs[x], vehicle.ys[x]]).reshape(-1, 1)
-		update = vehicle.kalman.update(point, vehicle.H, vehicle.R)
+		vehicle.kalman.update(point, vehicle.H, vehicle.R)
 		# update the state
-		vehicle.kalman.state = update[0]
-		vehicle.kalman.P = update[1]
 		cur_state = vehicle.kalman.state
 		states.append(cur_state.flatten())
 
 		# prediction step
-		prediction = vehicle.kalman.predict()
-		vehicle.kalman.state = prediction[0]
-		vehicle.kalman.P = prediction[1]
-
+		vehicle.kalman.predict()
 	
 	states = np.array(states)
+	print("Final Covariance\n", vehicle.kalman.covariance)
 	plt.plot(vehicle.xs, vehicle.ys, 'b', label="Measurements")
 	plt.plot(states[:, 0], states[:, 3], 'r', label="Filtered")
 	plt.legend()
