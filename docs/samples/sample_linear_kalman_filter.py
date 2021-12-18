@@ -3,46 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from robotics.estimation.kalman_filter import KalmanFilter
 
-class Object3DTracking:
-	def run(self):
-		# define the transition matrices
-		delta_t = 0.01
-		newton_acc = 0.5*delta_t*delta_t
-		control_F = np.array([
-				[1, 0, 0, delta_t, 0, 0],
-				[0, 1, 0, 0, delta_t, 0],
-				[0, 0, 1, 0, 0, delta_t],
-				[0, 0, 0, 1, 0, 0],
-				[0, 0, 0, 0, 1, 0],
-				[0, 0, 0, 0, 0, 1]
-			]
-			)
-		control_G = np.array([
-				[newton_acc, 0, 0],
-				[0, newton_acc, 0],
-				[0, 0, newton_acc],
-				[delta_t, 0, 0],
-				[0, delta_t, 0],
-				[0, 0, delta_t]
-			]
-		)
-		state_init = np.zeros(6)
-		cov_init = np.eye(6)
-		kalman = KalmanFilter(state_init, cov_init, control_F, control_G, np.eye(6), 0.5, delta_t)
-		print(kalman.predict([0.1, 0, 0]))
-
-		# measure the x, y, z coordinates
-		measurement = np.array([0.5, 0.2, 0]).reshape(-1, 1)
-		H = np.array([
-			[1, 0, 0, 0, 0, 0],
-			[0, 1, 0, 0, 0, 0],
-			[0, 0, 1, 0, 0, 0]
-		])
-
-		R = np.eye(3)
-
-		print(kalman.update(measurement, H, R))
-
 class Vehicle2DEstimation:
 	def __init__(self) -> None:
 		delta_t = 1
