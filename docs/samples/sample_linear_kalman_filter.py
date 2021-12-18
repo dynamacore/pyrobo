@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from robotics.estimation.kalman_filter import KalmanFilter
+from robotics.estimation import KalmanFilter
 
 class Vehicle2DEstimation:
 	def __init__(self) -> None:

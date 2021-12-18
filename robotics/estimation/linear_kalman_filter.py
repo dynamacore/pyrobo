@@ -18,7 +18,6 @@ class KalmanFilter:
 		self.covariance = initial_cov
 
 		self.process_noise_cov = process_noise
-		self.measurement_noise = np.eye(self.state.shape[0])
 	
 	def predict(self, control=None):
 		'''
