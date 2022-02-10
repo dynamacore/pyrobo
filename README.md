@@ -16,3 +16,7 @@ Until I can put this onto PyPI, feel free to install it into a local python envi
 git clone https://github.com/bkolligs/robotics-prototyping.git
 pip install -e robotics-prototyping
 ```
+Documentation
+==========
+
+The documentation is displayed here: https://bkolligs.github.io/pyrobo/
