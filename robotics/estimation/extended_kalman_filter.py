@@ -1,4 +1,4 @@
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union
 import numpy as np
 
 class ExtendedKalmanFilter:
@@ -9,7 +9,6 @@ class ExtendedKalmanFilter:
 		process_noise: np.ndarray,
 	):
 
-		self.transition_model = transition_matrix
 
 		self.state = initial_state.reshape(-1, 1)
 		self.covariance = initial_cov
@@ -29,7 +28,8 @@ class ExtendedKalmanFilter:
 		initial_state: np.ndarray,
 		initial_covariance: np.ndarray,
 		# if there's input pass that to this function as the second argument
-		nonlinear_motion_model: Callable[[np.ndarray], np.ndarray] | Callable[[np.ndarray, list], np.ndarray],
+		nonlinear_motion_model: Union[Callable[[np.ndarray], np.ndarray], Callable[[np.ndarray, list], np.ndarray]],
+		# TODO: add a jacobian here for calculating F from the motion model
 		process_noise_covariance: np.ndarray,
 		control: np.ndarray = None
 	)->Tuple[np.ndarray, np.ndarray]:
@@ -42,6 +42,8 @@ class ExtendedKalmanFilter:
 		P_0 = initial_covariance
 		Q = process_noise_covariance
 		u = control
+		# TODO: update this!
+		F = np.eye(len(initial_state))
 		# predict the state
 		if u is not None: 
 			next_state = nonlinear_motion_model(x_0, u)
