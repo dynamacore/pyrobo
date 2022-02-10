@@ -206,6 +206,11 @@ class Transform:
             y_axis = (scale_factor * self.y_axis ) / np.linalg.norm(self.y_axis) + self.origin
             z_axis = (scale_factor * self.z_axis ) / np.linalg.norm(self.z_axis) + self.origin
 
+            # save the axes to the context
+            self.x_axis = x_axis
+            self.y_axis = y_axis
+            self.z_axis = z_axis
+
             # collect plot values
             # i unit vectors
             iX, iY, iZ  = x_axis[0], x_axis[1], x_axis[2]
