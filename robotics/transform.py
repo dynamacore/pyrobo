@@ -37,18 +37,25 @@ class Transform:
     
     # overload multiplication
     def __mul__(self, other):
-        result = self.transform @ other.transform
-        result_tran = Transform(transform=result)
-        # calculate pose from transform
-        output = result_tran.inverse_pose()
-        x, y, z, theta, phi, psi = output
+        if isinstance(other, Transform):
+            result = self.transform @ other.transform
+            result_tran = Transform(transform=result)
+            # calculate pose from transform
+            output = result_tran.inverse_pose()
+            x, y, z, theta, phi, psi = output
 
-        if self.child == other.parent is not None:
-            source = self.child
-            source_other = other.child
-            dest = self.parent
-            dest_other = other.parent
-            return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+            if self.child == other.parent is not None:
+                source = self.child
+                source_other = other.child
+                dest = self.parent
+                dest_other = other.parent
+                return Transform(x, y, z, theta, phi, psi, parent=dest, child=source_other)
+
+        elif isinstance(other, np.ndarray):
+            if other.shape == (4, ):
+                return self.transform @ other.reshape(-1, 1)
+            elif other.shape == (3, ):
+                return (self.transform @ np.array(list(other) + [1]))[:3]
 
         # frames not specified
         return Transform(x, y, z, theta, phi, psi)
