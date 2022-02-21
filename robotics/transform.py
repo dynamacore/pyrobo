@@ -77,7 +77,7 @@ class Transform:
     def get_forward(self):
         return self.__forward
     
-    def update_transform(self, x, y, z, theta, phi, psi):
+    def update_transform(self, x=0, y=0, z=0, theta=0, phi=0, psi=0):
         """
         updates the transform according to the entered values
         """
