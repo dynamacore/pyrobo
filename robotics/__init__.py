@@ -15,3 +15,6 @@ from .kinematic_tree import *
 
 # subpackages
 from . import controllers
+
+# C++ bindings
+from _pyrobo import *

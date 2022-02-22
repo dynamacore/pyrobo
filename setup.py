@@ -42,11 +42,12 @@ print(colored(f"Eigen found at '{eigen_path}'!", 'green'))
 include_dirs = [eigen_path]
 ext_modules = [ 
     Pybind11Extension(
-        "pyrobo",
+        "robotics/_pyrobo",
         sorted(
             ["src/quaternion.cpp"]
         ), 
         cxx_std=17,
+        language='c++',
         include_dirs=include_dirs
     )
 ]

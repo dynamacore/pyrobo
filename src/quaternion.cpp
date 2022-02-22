@@ -3,8 +3,13 @@
 #include "pybind11/eigen.h"
 #include "Eigen/Dense"
 
-int main(int argc, char const *argv[])
-{
-	std::cout << "Hello?" << std::endl;
-	return 0;
+namespace py = pybind11;
+
+int add(int a, int b) {
+
+	return a + b;
+}
+
+PYBIND11_MODULE(_pyrobo, m) {
+	m.def("add", &add);
 }
