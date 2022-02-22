@@ -204,6 +204,17 @@ def test_multiply_non_matching_frames(frames):
 	new = four * one
 	assert new.parent == new.child is None
 
+def test_updating_one_variable():
+	test = robotics.Transform()
+	test.update_transform(x=1)
+	assert test.x == 1
+
+	test.update_transform(phi=-1)
+	assert test.phi == -1
+
+	test.update_transform(psi=10)
+	assert test.psi == 10
+
 if __name__ == '__main__':
 	one = robotics.Transform(x=0.5)
 	two = robotics.Transform(x=0.5)

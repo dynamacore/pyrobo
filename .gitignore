@@ -17,3 +17,6 @@ docs/math/*
 
 # notebook related
 .ipynb_checkpoints
+
+# C++ related
+build
