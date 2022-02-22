@@ -1,72 +1,55 @@
-import os, subprocess, platform, sys
+import os
 from termcolor import colored
-from setuptools import setup, find_packages, Extension
-from setuptools.command.build_ext import build_ext
-from pybind11.setup_helpers import Pybind11Extension, build_ext
-
+from setuptools import setup, find_packages
+from pybind11.setup_helpers import Pybind11Extension 
 """
-This is taken from this blog: https://www.benjack.io/2017/06/12/python-cpp-tests.html
 Along with the PyBind11 docs: https://pybind11.readthedocs.io/en/stable/compiling.html#building-with-setuptools
 And PyBind11 examples: https://github.com/pybind/python_example
-And PyBind11 examples: https://github.com/pybind/cmake_example
 
 Test that this works with `python setup.py develop`
 """
 
-class CMakeExtension(Extension):
-    def __init__(self, name, sources='') -> None:
-        super().__init__(name, sources=[])
-        self.sources = os.path.abspath(sources)
+# Places to look for eigen on the machine
+candidate_paths = [
+    os.environ.get("EIGEN_INCLUDE_DIR", "/usr/include/eigen3"),
+    "/usr/local/include/eigen3"
+]
 
-class CMakeBuild(build_ext):
-    def run(self) -> None:
-        try:
-            print(colored("Building extension", "green"))
-            # Check for the cmake version installed on the system
-            out = subprocess.check_output(['cmake', '--version'])
-        except OSError:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: " 
-                + ", ".join(e.name for e in self.extensions)
-            )
-        for ext in self.extensions:
-            self.build_extension(ext)
-    
-    def build_extension(self, ext) -> None:
-        extension_dir = os.path.abspath(
-            os.path.dirname(self.get_ext_fullpath(ext.name))
-        )
+eigen_path = iter(candidate_paths)
+for eigen_path in candidate_paths:
+    print(f"Looking for Eigen at the path: {eigen_path}")
+    if not os.path.exists(eigen_path):
+        print(colored(f"Could not find Eigen3 at the path: {eigen_path}\n"), 'yellow')
 
-        cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY='+extension_dir,
-            '-DPYTHON_EXECUTABLE='+sys.executable
-        ]
+        USE_CONDA_INCLUDE_FOR_EIGEN = True
+    else:
+        USE_CONDA_INCLUDE_FOR_EIGEN = False
+        break
 
-        config = "Debug" if self.debug else "Release"
-        build_args = ['--config', config]
+if USE_CONDA_INCLUDE_FOR_EIGEN:
+    if "CONDA_PREFIX" in os.environ:
+        conda_path = os.environ.get("CONDA_PREFIX")
+        eigen_path = conda_path + "/include/eigen3"
+        print(colored(f"Using conda environment defined here to look for Eigen'{eigen_path}'", 'green'))
+    else:
+        raise RuntimeError(colored("Make sure to activate your conda environment!", 'red'))
 
-        # These can be added only for non-windows systems
-        cmake_args += ["-DCMAKE_BUILD_TYPE="+config]
-        build_args += ["--", "-j2"]
+if not os.path.exists(eigen_path):
+    raise RuntimeError(colored("\nEigen3 is not installed in the current environment! Please install it with one of the following options: \n\t1. sudo apt install libeigen3-dev\n\t2. conda install -c conda-forge eigen\n\t3. Download the git repository as described here: https://eigen.tuxfamily.org/dox/GettingStarted.html", 'red'))
 
-        env_vars = os.environ.copy()
-        env_vars["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
-            env_vars.get("CXXFLAGS", ''),
-            self.distribution.get_version()
-        )
+print(colored(f"Eigen found at '{eigen_path}'!", 'green'))
 
-        if not os.path.exists(self.build_temp): os.makedirs(self.build_temp)
-
-        subprocess.check_call(
-            ['cmake', ext.sources] + cmake_args,
-             cwd=self.build_temp, env=env_vars
-        )
-        subprocess.check_call(
-            ['cmake', '--build', '.'] + build_args,
-             cwd=self.build_temp
-        )
-
-        print()
+include_dirs = [eigen_path]
+ext_modules = [ 
+    Pybind11Extension(
+        "pyrobo",
+        sorted(
+            ["src/quaternion.cpp"]
+        ), 
+        cxx_std=17,
+        include_dirs=include_dirs
+    )
+]
 
 setup(
     name="pyrobo",
@@ -77,14 +60,12 @@ setup(
     url='https://github.com/bkolligs/pyrobo.git',
     license='MIT',
     # add extension module
-    ext_modules=[CMakeExtension("robotics")],
-    # add custom build exty command
-    cmdclass=dict(build_ext=CMakeBuild),
+    ext_modules=ext_modules,
     packages=find_packages(),
+    extras_require={"test": "pytest"},
     zip_safe=False,
     install_requires=[
         'numpy',
         'matplotlib',
-        'pybind11'
-    ]
+    ],
 )

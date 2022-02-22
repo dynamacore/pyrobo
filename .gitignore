@@ -20,3 +20,4 @@ docs/math/*
 
 # C++ related
 build
+*.so
