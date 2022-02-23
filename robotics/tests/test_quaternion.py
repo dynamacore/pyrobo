@@ -1,4 +1,8 @@
-from robotics import add
+from robotics import Quaternion
 
 def test_quaternion():
-	assert add(1,2) == 3
+	q1 = Quaternion()
+
+if __name__ == '__main__':
+	q1 = Quaternion()
+	print(q1*2.0)

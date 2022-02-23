@@ -8,6 +8,8 @@ And PyBind11 examples: https://github.com/pybind/python_example
 
 Test that this works with `python setup.py develop`
 """
+# Use G++ to compile C++
+os.environ["CC"] = "g++"
 
 # Places to look for eigen on the machine
 candidate_paths = [
@@ -39,12 +41,18 @@ if not os.path.exists(eigen_path):
 
 print(colored(f"Eigen found at '{eigen_path}'!", 'green'))
 
-include_dirs = [eigen_path]
+include_dirs = [eigen_path, 'src/inc', 'src/bindings']
 ext_modules = [ 
     Pybind11Extension(
         "_pyrobo",
         sorted(
-            ["src/quaternion.cpp"]
+            [
+                "src/quaternion.cpp",
+                "src/robo_utils.cpp",
+                # Bindings live in their own folders 
+                "src/bindings/bindings.cpp",
+                "src/bindings/quaternion_bind.cpp"
+            ]
         ), 
         cxx_std=17,
         language='c++',
