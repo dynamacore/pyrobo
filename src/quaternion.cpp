@@ -10,21 +10,31 @@ Quaternion::Quaternion(Eigen::Vector3d p) {
 	z_ = p(2)/p.norm();
 }
 
-
 Quaternion::~Quaternion(){}
 
-
-double Quaternion::norm() {
-	return sqrt(w()*w() + x()*x() + y()*y() + z()*z());
+std::string Quaternion::toString() const {
+	std::stringstream ss;
+	ss << "[" << w_ << ", " << x_ << "i, " << y_ << "j, " << z_<< "k]";
+	return ss.str();
 }
 
-Quaternion Quaternion::adjoint() {
+std::string Quaternion::toRepr() const {
+	std::stringstream ss;
+	ss << "Quaternion(" << w_ << ", " << x_ << ", " << y_ << ", " << z_<< ")";
+	return ss.str();
+}
+
+Quaternion Quaternion::inv() const {
+	Quaternion qTemp = adjoint();
+	return qTemp/(norm()*norm());
+}
+
+Quaternion Quaternion::adjoint() const {
 	return Quaternion(w(), x(), y(),z());
 }
 
-Quaternion Quaternion::inv() {
-	Quaternion qTemp = adjoint();
-	return qTemp/(norm()*norm());
+double Quaternion::norm() const {
+	return sqrt(w()*w() + x()*x() + y()*y() + z()*z());
 }
 
 bool Quaternion::isApprox(Quaternion other, double atol, double rtol) {
@@ -35,37 +45,40 @@ bool Quaternion::isApprox(Quaternion other, double atol, double rtol) {
 }
 
 /**
- * Quaternion number operator overloads
+ * Quaternion number operator overloads, including the member overloads and the friend overloads together
  */
-Quaternion operator+(Quaternion &q, double a) {return Quaternion(q.w()+a, q.x(), q.y(), q.z());}
-Quaternion operator+(double a, Quaternion &q) {return Quaternion(q.w()+a, q.x(), q.y(), q.z());}
+Quaternion Quaternion::operator+(const double a) const {return Quaternion(w()+a, x(), y(), z());}
+Quaternion operator+(const double a, const Quaternion &q) {return Quaternion(q.w()+a, q.x(), q.y(), q.z());}
 
-Quaternion operator*(const Quaternion &q, const double a) {return Quaternion(q.w()*a, q.x()*a, q.y()*a, q.z()*a);}
+Quaternion Quaternion::operator-(const double a) const {return Quaternion(w()-a, x(), y(), z());}
+Quaternion operator-(const double a, const Quaternion &q) {return Quaternion(q.w()-a, q.x(), q.y(), q.z());}
+Quaternion Quaternion::operator*(const double a) const {return Quaternion(w()*a, x()*a, y()*a, z()*a);}
 Quaternion operator*(const double a, const Quaternion &q) {return Quaternion(q.w()*a, q.x()*a, q.y()*a, q.z()*a);}
 
-Quaternion operator/(Quaternion &q, double a) {return Quaternion(q.w()/a, q.x()/a, q.y()/a, q.z()/a);}
-Quaternion operator/(double a, Quaternion &q) {Quaternion qTemp = q.inv(); return a*qTemp;}
+Quaternion Quaternion::operator/(const double a) const {return Quaternion(w()/a, x()/a, y()/a, z()/a);}
+Quaternion operator/(const double a, const Quaternion &q) {Quaternion qTemp = q.inv(); return a*qTemp;}
+
 /**
  * Quaternion Quaternion operator overloads
  */
-Quaternion operator*(Quaternion &q1, Quaternion &q2) {
-	double new_w = q1.w()*q2.w() - q1.x()*q2.x() - q1.y()*q2.y() - q1.z()*q2.z();
-	double new_x = q1.w()*q2.x() + q1.x()*q2.w() + q1.y()*q2.z() - q1.z()*q2.y();
-	double new_y = q1.w()*q2.y() - q1.x()*q2.z() + q1.y()*q2.w() + q1.z()*q2.x();
-	double new_z = q1.w()*q2.z() + q1.x()*q2.y() - q1.y()*q2.x() + q1.z()*q2.w();
+Quaternion Quaternion::operator*(const Quaternion &q) const {
+	double new_w = w()*q.w() - x()*q.x() - y()*q.y() - z()*q.z();
+	double new_x = w()*q.x() + x()*q.w() + y()*q.z() - z()*q.y();
+	double new_y = w()*q.y() - x()*q.z() + y()*q.w() + z()*q.x();
+	double new_z = w()*q.z() + x()*q.y() - y()*q.x() + z()*q.w();
 	return Quaternion(new_w, new_x, new_y, new_z);
 }
 
-Quaternion operator+(Quaternion &q1, Quaternion &q2) {
-	return Quaternion(q1.w()+q2.w(), q1.x()+q2.x(), q1.y()+q2.y(), q1.z()+q2.z());
+Quaternion Quaternion::operator+(const Quaternion &q) const {
+	return Quaternion(w()+q.w(), x()+q.x(), y()+q.y(), z()+q.z());
 }
 
-Quaternion operator-(Quaternion &q1, Quaternion &q2) {
-	return Quaternion(q1.w()-q2.w(), q1.x()-q2.x(), q1.y()-q2.y(), q1.z()-q2.z());
+Quaternion Quaternion::operator-(const Quaternion &q) const { 
+	return Quaternion(w()-q.w(), x()-q.x(), y()-q.y(), z()-q.z());
 }
 
-Quaternion operator/(Quaternion &q1, Quaternion &q2) {
-	Quaternion qTemp = q2.inv();
-	Quaternion out = q1*qTemp;
+Quaternion Quaternion::operator/(const Quaternion &q) const {
+	Quaternion qTemp = inv();
+	Quaternion out = q*qTemp;
 	return out;
 }

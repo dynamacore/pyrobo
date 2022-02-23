@@ -27,35 +27,53 @@ public:
 	~Quaternion();
 
 	/* Getters */
+	Eigen::Vector4d data() const {return Eigen::Vector4d{w_, x_, y_, z_};}
 	double w() const {return w_;}
 	double x() const {return x_;}
 	double y() const {return y_;}
 	double z() const {return z_;}
 
-	/* Basic operations */
-	Quaternion inv();
-	double norm();
-	Quaternion adjoint();
+	/* Output functions */
+	std::string toString() const;
+	std::string toRepr() const;
+
+	/**
+	 * @brief Inverse of the quaternion
+	 */
+	Quaternion inv() const;
+	/**
+	 * @brief The norm of the quaternion
+	 */
+	double norm() const;
+	/**
+	 * The adjoint or conjugate
+	 */
+	Quaternion adjoint() const;
 
 	bool isApprox(Quaternion other, double atol=0, double rtol=std::numeric_limits<double>::epsilon());
+
+	/**
+	 * Quaternion number operator overloads
+	 */
+	Quaternion operator+(const double a) const;
+	friend Quaternion operator+(const double a, const Quaternion &q);
+
+	Quaternion operator-(const double a) const;
+	friend Quaternion operator-(const double a, const Quaternion &q);
+
+	Quaternion operator*(const double a) const;
+	friend Quaternion operator*(const double a, const Quaternion &q);
+
+	Quaternion operator/(const double a) const;
+	friend Quaternion operator/(const double a, const Quaternion &q);
+
+	/**
+	 * Quaternion Quaternion operator overloads
+	 */
+	Quaternion operator*(const Quaternion &q) const;
+	Quaternion operator+(const Quaternion &q) const;
+	Quaternion operator-(const Quaternion &q) const;
+	Quaternion operator/(const Quaternion &q) const;
 };
-
-/**
- * Quaternion number operator overloads
- */
-Quaternion operator*(const Quaternion &q, const double a);
-Quaternion operator*(const double a, const Quaternion &q);
-Quaternion operator+(Quaternion &q, double a);
-Quaternion operator+(double a, Quaternion &q);
-Quaternion operator/(Quaternion &q, double a);
-Quaternion operator/(double a, Quaternion &q);
-
-/**
- * Quaternion Quaternion operator overloads
- */
-Quaternion operator*(Quaternion &q1, Quaternion &q2);
-Quaternion operator+(Quaternion &q1, Quaternion &q2);
-Quaternion operator-(Quaternion &q1, Quaternion &q2);
-Quaternion operator/(Quaternion &q1, Quaternion &q2);
 
 #endif //_quaternion_h_ header
