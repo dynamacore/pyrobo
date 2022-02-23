@@ -25,8 +25,7 @@ std::string Quaternion::toRepr() const {
 }
 
 Quaternion Quaternion::inv() const {
-	Quaternion qTemp = adjoint();
-	return qTemp/(norm()*norm());
+	return adjoint()/(norm()*norm());
 }
 
 Quaternion Quaternion::adjoint() const {
@@ -78,7 +77,5 @@ Quaternion Quaternion::operator-(const Quaternion &q) const {
 }
 
 Quaternion Quaternion::operator/(const Quaternion &q) const {
-	Quaternion qTemp = inv();
-	Quaternion out = q*qTemp;
-	return out;
+	return q*inv();
 }
