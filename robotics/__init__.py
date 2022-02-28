@@ -15,4 +15,6 @@ from .kinematic_tree import KinematicTree
 from .quaternion import Quaternion
 
 # subpackages
-from . import controllers
+from .controllers import *
+from .planning import *
+from .estimation import *
