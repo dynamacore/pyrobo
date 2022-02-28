@@ -5,4 +5,7 @@
 namespace py = pybind11;
 using namespace py::literals;
 
+/**
+ * Documentation for the bindings will be contained inside a python stubs file with extension *.pyi
+ */
 void quaternion_bind(py::module_ &m);

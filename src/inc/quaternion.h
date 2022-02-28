@@ -22,7 +22,7 @@ public:
 	/**
 	 * Construct quaternion from a 3D vector
 	 */
-	Quaternion(Eigen::Vector3d p = {0, 0, 0});
+	Quaternion(const Eigen::Vector3d &p);
 
 	~Quaternion();
 
@@ -42,15 +42,22 @@ public:
 	 */
 	Quaternion inv() const;
 	/**
-	 * @brief The norm of the quaternion
-	 */
-	double norm() const;
-	/**
 	 * The adjoint or conjugate
 	 */
 	Quaternion adjoint() const;
+	/**
+	 * @brief The norm of the quaternion
+	 */
+	double norm() const;
 
-	bool isApprox(Quaternion other, double atol=0, double rtol=std::numeric_limits<double>::epsilon());
+	bool isRotation(double atol=1E-12) const;
+
+	bool isApprox(const Quaternion other, double atol=0, double rtol=std::numeric_limits<double>::epsilon()) const;
+
+	/**
+	 * Quaternion vector rotation
+	 */
+	Eigen::Vector3d operator*(const Eigen::Vector3d &vector) const;
 
 	/**
 	 * Quaternion number operator overloads
@@ -74,6 +81,7 @@ public:
 	Quaternion operator+(const Quaternion &q) const;
 	Quaternion operator-(const Quaternion &q) const;
 	Quaternion operator/(const Quaternion &q) const;
+	bool operator==(const Quaternion &q) const;
 };
 
 #endif //_quaternion_h_ header

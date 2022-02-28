@@ -1,7 +1,9 @@
 import os
+
+from pybind11.setup_helpers import Pybind11Extension
+from setuptools import find_packages, setup
 from termcolor import colored
-from setuptools import setup, find_packages
-from pybind11.setup_helpers import Pybind11Extension 
+
 """
 Along with the PyBind11 docs: https://pybind11.readthedocs.io/en/stable/compiling.html#building-with-setuptools
 And PyBind11 examples: https://github.com/pybind/python_example

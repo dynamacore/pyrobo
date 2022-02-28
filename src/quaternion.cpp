@@ -3,7 +3,7 @@
 Quaternion::Quaternion() : w_{0}, x_{0}, y_{0}, z_{0} {}
 Quaternion::Quaternion(double w, double x, double y, double z) : w_{w}, x_{x}, y_{y}, z_{z} {}
 
-Quaternion::Quaternion(Eigen::Vector3d p) {
+Quaternion::Quaternion(const Eigen::Vector3d &p) {
 	w_ = 0.0;
 	x_ = p(0)/p.norm();
 	y_ = p(1)/p.norm();
@@ -29,18 +29,29 @@ Quaternion Quaternion::inv() const {
 }
 
 Quaternion Quaternion::adjoint() const {
-	return Quaternion(w(), x(), y(),z());
+	return Quaternion(w(), -x(), -y(),-z());
 }
 
 double Quaternion::norm() const {
 	return sqrt(w()*w() + x()*x() + y()*y() + z()*z());
 }
 
-bool Quaternion::isApprox(Quaternion other, double atol, double rtol) {
+bool Quaternion::isRotation(double atol) const {
+	return utils::isApprox(norm(), 1.0, atol);
+}
+
+bool Quaternion::isApprox(const Quaternion other, double atol, double rtol) const {
 	return 	utils::isApprox(w(), other.w(), atol=atol, rtol=rtol) and
 			utils::isApprox(x(), other.x(), atol=atol, rtol=rtol) and
 			utils::isApprox(y(), other.y(), atol=atol, rtol=rtol) and
 			utils::isApprox(z(), other.z(), atol=atol, rtol=rtol);
+}
+
+/* Rotation of a 3D vector */
+Eigen::Vector3d Quaternion::operator*(const Eigen::Vector3d &vector) const{
+	Quaternion vector_quaternion(vector);
+	vector_quaternion = this->operator*(vector_quaternion)*adjoint();
+	return {vector_quaternion.x(), vector_quaternion.y(), vector_quaternion.z()};
 }
 
 /**
@@ -78,4 +89,8 @@ Quaternion Quaternion::operator-(const Quaternion &q) const {
 
 Quaternion Quaternion::operator/(const Quaternion &q) const {
 	return q*inv();
+}
+
+bool Quaternion::operator==(const Quaternion &q) const {
+	return isApprox(q);
 }
