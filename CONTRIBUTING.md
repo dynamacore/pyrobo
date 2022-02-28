@@ -1,13 +1,15 @@
 # Contributing to the Robotics Prototyping Package
 
-Python style: 
-	Functions and Variables: snake_case
-	Classes: PascalCase
+**Python style**: 
 
-C++ style: 
-	Functions: camelCase
-	Classes: PascalCase
-	Variables: snake_case
+*	Functions and Variables: `snake_case`
+*	Classes: `PascalCase`
+
+**C++ style**: 
+
+*	Functions: `camelCase`
+*	Classes: `PascalCase`
+*	Variables: `snake_case`
 
 # Include Stub files alongside C++ classes for intellisense
 
