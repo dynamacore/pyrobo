@@ -7,6 +7,10 @@ void quaternion_bind(py::module_ &m) {
 			"w"_a=0, "x"_a=0, "y"_a=0, "z"_a=0)
 		.def(py::init<Eigen::Vector3d>(),
 			"p"_a)
+		.def(py::init<Eigen::Vector3d, double>(), 
+			"axis"_a, "angle"_a)
+		.def(py::init<double, double, double>(),
+			"roll"_a, "pitch"_a, "yaw"_a)
 		.def("w"          , &Quaternion::w)
 		.def("x"          , &Quaternion::x)
 		.def("y"          , &Quaternion::y)
@@ -19,6 +23,8 @@ void quaternion_bind(py::module_ &m) {
 			"other"_a, "atol"_a=0, "rtol"_a=std::sqrt(std::numeric_limits<double>::epsilon()))
 		.def("rotation", &Quaternion::isRotation, 
 			"atol"_a=1E-12)
+		.def("to_axis_ang", &Quaternion::toAxisAngle)
+		.def("to_matrix", &Quaternion::toRotationMatrix)
 		.def("__repr___"  , &Quaternion::toRepr)
 		.def("__str__"    , &Quaternion::toString)
 		.def(double() * py::self)

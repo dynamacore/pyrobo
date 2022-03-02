@@ -23,6 +23,14 @@ public:
 	 * Construct quaternion from a 3D vector
 	 */
 	Quaternion(const Eigen::Vector3d &p);
+	/**
+	 * Construct a quaternion from an axis angle 
+	 */
+	Quaternion(const Eigen::Vector3d &axis, const double angle);
+	/**
+	 * Construct a quaternion from euler angles XYZ
+	 */
+	Quaternion(const double roll, const double pitch, const double yaw);
 
 	~Quaternion();
 
@@ -82,6 +90,13 @@ public:
 	Quaternion operator-(const Quaternion &q) const;
 	Quaternion operator/(const Quaternion &q) const;
 	bool operator==(const Quaternion &q) const;
+
+	/**
+	 * Methods for converting Quaternions to other rotation representations
+	 */
+	Eigen::Matrix3d toRotationMatrix();
+	std::pair<Eigen::Vector3d, double> toAxisAngle();
+
 };
 
 #endif //_quaternion_h_ header

@@ -10,6 +10,27 @@ Quaternion::Quaternion(const Eigen::Vector3d &p) {
 	z_ = p(2)/p.norm();
 }
 
+Quaternion::Quaternion(const Eigen::Vector3d &axis, const double angle) {
+	double s2 = sin(angle/2);
+	w_ = cos(angle/2);
+	x_ = s2*axis(0);
+	y_ = s2*axis(1);
+	z_ = s2*axis(2);
+}
+
+Quaternion::Quaternion(const double roll, const double pitch, const double yaw) {
+	double cr = cos(roll*0.5);
+	double sr = sin(roll*0.5);
+	double cp = cos(pitch*0.5);
+	double sp = sin(pitch*0.5);
+	double cy = cos(yaw*0.5);
+	double sy = sin(yaw*0.5);
+	w_ = cr*cp*cy - sr*sp*sy ;
+	x_ = sr*cp*cy + cr*sp*sy ;
+	y_ = cr*sp*cy - sr*cp*sy ;
+	z_ = cr*cp*sy + sr*sp*cy ;
+}
+
 Quaternion::~Quaternion(){}
 
 std::string Quaternion::toString() const {
@@ -93,4 +114,26 @@ Quaternion Quaternion::operator/(const Quaternion &q) const {
 
 bool Quaternion::operator==(const Quaternion &q) const {
 	return isApprox(q);
+}
+
+Eigen::Matrix3d Quaternion::toRotationMatrix() {
+	double s = 1/(norm()*norm());
+	double r = w();
+	double i = x();
+	double j = y();
+	double k = z();
+
+	Eigen::Matrix3d out;
+	out << 1-2*s*(j*j+k*k), 2*s*(i*j-k*r)   , 2*s*(i*k+j*r)    ,
+		   2*s*(i*j+k*r)  , 1-2*s*(i*i+k*k) , 2*s*(j*k-i*r)    ,
+		   2*s*(i*k-j*r)  , 2*s*(j*k+i*r)   , 1-2*s*(i*i+j*j);
+	return out;
+}
+
+std::pair<Eigen::Vector3d, double> Quaternion::toAxisAngle() {
+	// Extract the axis from the quaternion and normalize it
+	Eigen::Vector3d axis{x(), y(), z()};
+	axis /= axis.norm();
+	double angle = 2*atan2(axis.norm(), w());
+	return std::pair<Eigen::Vector3d, double>(axis, angle);
 }
