@@ -12,9 +12,11 @@ And PyBind11 examples: https://github.com/pybind/python_example
 
 Test that this works with `python setup.py develop`
 """
-# Use G++ to compile C++
+# Use G++ to compile C++ on Linux
+os_name = platform.system()
 os.environ["CC"] = "g++"
-if 
+if os_name == "Darwin":
+    os.environ["CC"] = "clang"
 
 # Places to look for eigen on the machine
 candidate_paths = [
