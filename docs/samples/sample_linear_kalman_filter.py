@@ -8,23 +8,26 @@ class Vehicle2DEstimation:
 		delta_t = 1
 		newton_acc = 0.5*delta_t*delta_t
 		# no control inputs
+		# fmt: off
 		F = np.array([
-			[1, delta_t, newton_acc, 0, 0, 0],
-			[0, 1, delta_t, 0, 0, 0],
-			[0, 0, 1, 0, 0, 0],
-			[0, 0, 0, 1, delta_t, newton_acc], 
-			[0, 0, 0, 0, 1, delta_t],
-			[0, 0, 0, 0, 0, 1]
+			[1 , delta_t , newton_acc , 0 , 0       , 0]          ,
+			[0 , 1       , delta_t    , 0 , 0       , 0]          ,
+			[0 , 0       , 1          , 0 , 0       , 0]          ,
+			[0 , 0       , 0          , 1 , delta_t , newton_acc] ,
+			[0 , 0       , 0          , 0 , 1       , delta_t]    ,
+			[0 , 0       , 0          , 0 , 0       , 1]
 		])
 		print(F)
 		
 		q_directions = np.array(
 			[
-				[delta_t**4/4, delta_t**3/2, delta_t**2/2],
-				[delta_t**3/2, delta_t**2,   delta_t],
-				[delta_t**2/2, delta_t,      1]
+				[delta_t**4/4 , delta_t**3/2 , delta_t**2/2] ,
+				[delta_t**3/2 , delta_t**2   , delta_t]      ,
+				[delta_t**2/2 , delta_t      , 1]
 			]
 		)
+		# fmt: on
+
 		Q = np.zeros((6, 6))
 		Q[0:3, 0:3] = q_directions
 		Q[3:, 3:] = q_directions

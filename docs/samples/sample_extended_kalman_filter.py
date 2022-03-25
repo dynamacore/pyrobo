@@ -25,6 +25,7 @@ class BicycleModelEstimation:
 		x_dot, delta_dot = control
 		length = self.length
 		theta = init_state[2]
+		# fmt: off
 		x_next = np.array(
 			[
 				[x_dot*np.cos(theta)]            ,
@@ -36,6 +37,7 @@ class BicycleModelEstimation:
 				[0]
 			]
 		)
+		# fmt: on
 		return x_next
 	
 	def model_matrix(self, state:np.ndarray):
@@ -44,6 +46,7 @@ class BicycleModelEstimation:
 		'''
 		x, y, theta, delta, x_dot, delta_dot = state
 		length = self.length
+		# fmt: off
 		transition_model = np.array(
 			[
 				[0, 0, -x_dot*np.sin(theta), 0, np.cos(theta),            0],
@@ -54,6 +57,7 @@ class BicycleModelEstimation:
 				[0, 0, 0,                    0, 0,                        0],
 			]
 		)
+		# fmt: on
 		return transition_model
 	
 	def predict(self):

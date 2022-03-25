@@ -14,7 +14,7 @@ class Sensor:
     # simulate an update step
     def measure(self, state):
         # h(x) is the measurement model based off of the state
-        measurement = self.model(state) + np.random.normal(self.mean_, self.cov_) 
+        measurement = self.model(state) + np.random.normal(self.mean_, self.cov_)
         return measurement
 
     # the sensor model function producing prediction h(x)
@@ -32,16 +32,15 @@ class Sensor:
     def innovation(self, predict, measurement):
         return measurement - predict
 
-
     # plot a function with the current sensor noise model
-    def testPlot(self, function=lambda x: 2*x, start=0, end=1, step=100, plot=True):
+    def testPlot(self, function=lambda x: 2 * x, start=0, end=1, step=100, plot=True):
         # create an array of x values to graph
         x = np.linspace(start, end, step)
         signal = function(x)
 
         # corrupt the sensor
         mu = np.random.normal(self.mean_, self.cov_, size=x.shape)
-        
+
         # plot the sensor readings
         if plot:
             plt.plot(x, signal, "r", label="signal")
@@ -52,12 +51,14 @@ class Sensor:
 
         return signal, signal + mu
 
+
 class OdometrySensor(Sensor):
     def __init__(self, name, mean, cov, state):
         super().__init__(name, mean, cov, state)
         # the odometer senses (indirectly) the movement in the x direction
-        self.H = np.zeros(self.stateSize_) 
+        self.H = np.zeros(self.stateSize_)
         self.H[0] = 1
+
 
 class GyroSensor(Sensor):
     def __init__(self, name, mean, cov, state):
@@ -67,6 +68,6 @@ class GyroSensor(Sensor):
         self.H[2] = 1
 
 
-if __name__ == '__main__':
-	sense = Sensor("odom", 0, 0.2, np.zeros(3))
-	sense.testPlot()
+if __name__ == "__main__":
+    sense = Sensor("odom", 0, 0.2, np.zeros(3))
+    sense.testPlot()

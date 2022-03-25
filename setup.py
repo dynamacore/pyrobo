@@ -4,6 +4,7 @@ from glob import glob
 from pybind11.setup_helpers import Pybind11Extension
 from setuptools import find_packages, setup
 from termcolor import colored
+import platform
 
 """
 Along with the PyBind11 docs: https://pybind11.readthedocs.io/en/stable/compiling.html#building-with-setuptools
@@ -13,6 +14,7 @@ Test that this works with `python setup.py develop`
 """
 # Use G++ to compile C++
 os.environ["CC"] = "g++"
+if 
 
 # Places to look for eigen on the machine
 candidate_paths = [
